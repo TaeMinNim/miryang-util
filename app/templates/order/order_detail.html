@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "nav.html" %}
+
+<br>작성자 : {{ repUser.nickname }}
+<br>참여인원 : {{ group.joined_user | length }}
+<br>가게명 : {{ group.store }}
+<br>주문시간 : {{ group.time }}
+<br>총 배달비 : {{ group.delivery_cost }}
+<div class="submit">
+    {% if not user.joinGroup %}
+    <div class="group-join">
+        <form action="{{ url_for('order.join', groupID=group.groupID) }}">
+            <button class="joinBtn" type="submit">그룹 참여</button>
+        </form>
+    </div>
+    {% else %}
+        {% if user.joinGroup == group.groupID %}
+            {% if user.nickname == repUser.nickname %}
+            <div class="group-delete">
+                <form action="{{ url_for('order.delete', groupID=group.groupID) }}">
+                    <button class="deleteBtn" type="submit">그룹 삭제하기</button>
+                </form>
+            </div>
+            {% else %}
+            <div class="group-quit">
+                <form action="{{ url_for('order.quit') }}">
+                    <button class="quitBtn" type="submit">그룹 나가기</button>
+                </form>
+            </div>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

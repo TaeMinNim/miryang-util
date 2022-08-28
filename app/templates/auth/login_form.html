@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form">
+  <form type="submit" method="post">
+    {{ form.csrf_token }}
+    {% include "error_msg.html" %}
+    <label for="name">이름</label>
+    <input id="name" name="username" required>
+
+    <label for="nickname">닉네임</label>
+    <input id="nickname" name="nickname" required>
+    <button type="submit">완료</button>
+  </form>
+</div>
+{% endblock %}
