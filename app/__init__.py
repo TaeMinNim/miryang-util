@@ -14,10 +14,11 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app,db)
 
-    from app.views import auth_view, main_view, order_view
+    from app.views import auth_view, main_view, order_view, test_veiw
     app.register_blueprint(main_view.bp)
     app.register_blueprint(auth_view.bp)
     app.register_blueprint(order_view.bp)
+    app.register_blueprint(test_veiw.bp)
 
     return app
 

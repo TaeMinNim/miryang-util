@@ -1,10 +1,13 @@
 from flask_wtf import FlaskForm
-from wtforms import Form, StringField, TimeField, IntegerField
-from wtforms.validators import DataRequired
+from wtforms import Form, StringField, TimeField, IntegerField, EmailField
+from wtforms.validators import DataRequired, Email
 
-class Login_Form(FlaskForm):
+class Signup_Form(FlaskForm):
     username = StringField("이름", [DataRequired()], name="username")
     nickname = StringField("닉네임", [DataRequired()], name="nickname")
+    id = StringField("아이디", [DataRequired()], name="id")
+    password = StringField("비밀번호", [DataRequired()], name="password")
+    email = EmailField("이메일", [DataRequired()], name="email")
 
 class Create_Group_Form(FlaskForm):
     store = StringField('가게명', [DataRequired()], name="store")
@@ -17,3 +20,6 @@ class Order_Form(Form):
     quantity = IntegerField('qunatity', [DataRequired()])
     option = StringField('option')
 
+class SignUP_Form(Form):
+    userID = StringField('userID', [DataRequired()])
+    email = EmailField('email', [DataRequired(), Email()])

@@ -5,7 +5,7 @@
 {% if user %}
 <a href="{{ url_for('order.order') }}">주문하기</a>
 {% else %}
-<a href="{{ url_for('auth.login') }}">로그인</a>
+<a href="{{ url_for('auth.signup') }}">회원가입</a>
 {% endif %}
 
 <ul>

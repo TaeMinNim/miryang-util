@@ -2,8 +2,6 @@
 {% block content %}
 <div class="form">
   <form type="submit" method="post">
-    {{ form.csrf_token }}
-    {% include "error_msg.html" %}
     <label for="name">이름</label>
     <input id="name" name="username" required>
 
@@ -11,7 +9,7 @@
     <input id="nickname" name="nickname" required>
 
     <label for="id">아이디</label>
-    <input id="id" name="d" required>
+    <input id="id" name="id" required>
 
     <label for="password">비밀번호</label>
     <input id="password" name="password" required>
@@ -21,4 +19,5 @@
     <button type="submit">완료</button>
   </form>
 </div>
+<script src="{{ url_for('static', filename='test_signup.js') }}"></script>
 {% endblock %}
