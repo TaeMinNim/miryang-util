@@ -10,6 +10,6 @@ def loginKokao():
     if request.method == 'POST':
         json = request.get_json()
         print(json)
-        return ('', 204)
+        return redirect(url_for('main.index'))
     else:
         return redirect('https://kauth.kakao.com/oauth/authorize?response_type=code&client_id={REST_API_KEY}&redirect_uri={REDIRECT_URI}'.format(REST_API_KEY=API_KEY, REDIRECT_URI=URL))
