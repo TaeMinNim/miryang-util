@@ -12,4 +12,4 @@ def loginKokao():
         print(json)
         return ('', 204)
     else:
-        return redirect('https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}'.format(REST_API_KEY=API_KEY, REDIRECT_URI=URL))
+        return redirect('https://kauth.kakao.com/oauth/authorize?response_type=code&client_id={REST_API_KEY}&redirect_uri={REDIRECT_URI}'.format(REST_API_KEY=API_KEY, REDIRECT_URI=URL))
