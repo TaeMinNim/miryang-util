@@ -50,13 +50,16 @@ def detail(groupID):
         return redirect(url_for('main.index'))
     if request.method == 'POST':
         json = request.get_json()
+        print(json)
+        count = 0
         for order in json:
+            count += 1
             print(order['formdata'])
             form = Order_Form.from_json(order['formdata'])
             today = datetime.today()
             id = int(round(today.timestamp() * 1000))
             order = Order(
-                id = id,
+                id = id + count,
                 groupID = groupID,
                 userID = g.user.id,
                 menu = form.menu.data,
