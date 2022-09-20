@@ -5,8 +5,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     username = db.Column(db.String(20), nullable=False)
     nickname = db.Column(db.String(20), unique=True, nullable=False)
-    userID = db.Column(db.String(20), unique=True, nullable=False)
-    password = db.Column(db.String(20), nullable=False)
+    pw = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(50), nullable=False)
 
     joinGroup = db.Column(db.Integer, db.ForeignKey('GROUP.id', ondelete='SET NULL'))

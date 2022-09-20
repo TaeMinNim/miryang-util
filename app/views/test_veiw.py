@@ -8,7 +8,20 @@ API_KEY = 'a3daa2c3fe72cd4cb9b0940afa4451e6'
 URL = 'http://localhost:5000/test/kakao/code'
 #URL = 'http://13.209.94.41/test/login_kakao'
 
+@bp.route('/login/', methods=['POST'])
+def submittest():
+    data = {
+        'type': 'popup_login',
+        'username': '202145807',
+        'password': '!TMwhdkwhdk02',
+    }
 
+    header = {
+        'Content-Type':'application/x-www-form-urlencoded'
+    }
+    res = requests.post('https://plato.pusan.ac.kr/login.php', data=data, headers=header)
+    print(res.request.method)
+    return res.text
 
 @bp.route('/login_kakao/')
 def loginKokao():

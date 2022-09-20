@@ -51,7 +51,6 @@ def detail(groupID):
     if request.method == 'POST':
         json = request.get_json()
         for order in json:
-            print(order['formdata'])
             form = Order_Form.from_json(order['formdata'])
             today = datetime.today()
             id = int(round(today.timestamp() * 1000))
