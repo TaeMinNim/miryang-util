@@ -1,16 +1,8 @@
 from flask import Flask
-from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
-migrate = Migrate()
 
 def create_app():
     app = Flask(__name__)
     app.config.from_envvar('APP_CONFIG_FILE')
-
-    db.init_app(app)
-    migrate.init_app(app,db)
 
     from app.views import auth_view, main_view, order_view, test_veiw
     app.register_blueprint(main_view.bp)
