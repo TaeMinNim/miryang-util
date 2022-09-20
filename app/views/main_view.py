@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, g
-from app.models import User
 
 bp = Blueprint('main', __name__, url_prefix='/')
 

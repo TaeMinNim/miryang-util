@@ -1,6 +1,5 @@
 from flask import Blueprint, request, flash, redirect, url_for, render_template, g, session, jsonify
 from app.forms import Signup_Form
-from app.models import User
 from datetime import datetime
 import pymysql
 
@@ -37,24 +36,7 @@ def signup():
 
     else:
         return render_template('auth/signup_form.html', form=form)
-@bp.route('/logout/')
-def logout():
-    if not g.user:
-        return redirect(url_for('main.index'))
-    id = session['id']
-    '''user = User.query.get(id)
-    db.session.delete(user)
-    db.session.commit()'''
-    session.clear()
-    return redirect(url_for('main.index'))
 
-@bp.before_app_request
-def login_required():
-    id = session.get('id')
-    if id is None:
-        g.user = None
-    else:
-        g.user = User.query.get(id)
 
 
 
