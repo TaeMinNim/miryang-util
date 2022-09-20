@@ -8,7 +8,7 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 @bp.route('/username-overlap-check/')
 def usernameOverlapCheck():
     username = request.args['user_name']
-    db = pymysql.connect(host='localhost', port=3306, user='root', passwd='1234',db='delivery', charset='utf8')
+    db = pymysql.connect(host='localhost', port=3306, user='dbuser', passwd='!miryangUTIL2022',db='UTILITY_SERVICE', charset='utf8')
     cursor = db.cursor()
     sql = "SELECT id FROM SERVICE_USER WHERE username = '{username}'".format(username=username)
     user = cursor.execute(sql)
