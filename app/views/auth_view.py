@@ -18,22 +18,49 @@ def usernameOverlapCheck():
     else:
         return jsonify(response=True)
 
-@bp.route('/signup/', methods=('GET', 'POST'))
+@bp.route('/studentnum-overlap-check/')
+def studentnumOverlapCheck():
+    studentnum = request.args['student_num']
+    db = pymysql.connect(host='localhost', port=3306, user='dbuser', passwd='!miryangUTIL2022', db='UTILITY_SERVICE', charset='utf8')
+    cursor = db.cursor()
+    sql = "SELECT id FROM SERVICE_USER WHERE student_num = {studentnum}".format(studentnum=studentnum)
+    user = cursor.execute(sql)
+    db.close()
+    if user == 0:
+        return jsonify(response=False)
+    else:
+        return jsonify(response=True)
+
+@bp.route('/nickname-overlap-check/')
+def nicknameOverlapCheck():
+    nickname = request.args['nickname']
+    db = pymysql.connect(host='localhost', port=3306, user='dbuser', passwd='!miryangUTIL2022', db='UTILITY_SERVICE', charset='utf8')
+    cursor = db.cursor()
+    sql = "SELECT id FROM SERVICE_USER WHERE nickname = '{nickname}'".format(nickname=nickname)
+    user = cursor.execute(sql)
+    db.close()
+    if user == 0:
+        return jsonify(response=False)
+    else:
+        return jsonify(response=True)
+
+@bp.route('/signup/', methods=['POST'])
 def signup():
     form = Signup_Form()
     if request.method == 'POST':
-        db = pymysql.connect(host='localhost', port=3306, user='root', passwd='1234', db='DELIVERY', charset='utf8')
+        db = pymysql.connect(host='localhost', port=3306, user='dbuser', passwd='!miryangUTIL2022', db='UTILITY_SERVICE', charset='utf8')
         cursor = db.cursor()
         id = int(round(datetime.today().timestamp() * 1000))
-        print(id, form.username.data, form.pw.data, form.email.data, form.nickname.data)
-        print(type(id), type(form.username.data), type(form.pw.data), type(form.email.data), type(form.nickname.data))
-        sql = 'INSERT INTO SERVICE_USER (id, username, pw, email, nickname) VALUE({id}, \'{username}\', \'{pw}\', \'{email}\', \'{nickname}\')'.format(id=id, username=form.username.data, pw=form.pw.data, email=form.email.data, nickname=form.nickname.data)
+        print(id, form.username.data, form.pw.data, form.student_num.data, form.nickname.data)
+        print(type(form.student_num.data))
+        sql = """INSERT INTO SERVICE_USER 
+        (id, username, pw, student_num, nickname) VALUE({id}, '{username}', '{pw}', {student_num}, '{nickname}')
+        """.format(id=id, username=form.username.data, pw=form.pw.data, student_num=form.student_num.data, nickname=form.nickname.data)
+        print(sql)
         cursor.execute(sql)
         db.commit()
         db.close()
-
-    else:
-        return render_template('auth/signup_form.html', form=form)
+        return ('성공')
 
 
 

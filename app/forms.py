@@ -3,10 +3,10 @@ from wtforms import Form, StringField, TimeField, IntegerField, EmailField
 from wtforms.validators import DataRequired, Email
 
 class Signup_Form(FlaskForm):
-    username = StringField("아이디", [DataRequired()], name="username")
+    username = StringField("아이디", [DataRequired()], name="user_name")
     pw = StringField("비밀번호", [DataRequired()], name="pw")
     nickname = StringField("닉네임", [DataRequired()], name="nickname")
-    email = EmailField("이메일", [DataRequired()], name="email")
+    student_num = IntegerField("학번", [DataRequired()], name="student_num")
 
 class Create_Group_Form(FlaskForm):
     store = StringField('가게명', [DataRequired()], name="store")
