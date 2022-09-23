@@ -56,18 +56,24 @@ def signup():
     form = Signup_Form()
     if request.method == 'POST':
         db = db_connection()
+        print('db 연결 성공')
         cursor = db.cursor()
+        print('cursor 성공')
         id = int(round(datetime.today().timestamp() * 1000))
 
         hashed_pw = bcrypt.hashpw(form.pw.data.encode('utf-8'), bcrypt.gensalt())
         hashed_pw = hashed_pw.decode('utf-8')
+        print('hash 변환')
         sql = """INSERT INTO SERVICE_USER 
         (id, user_name, pw, student_num, nick_name) VALUE({id}, '{user_name}', '{pw}', {student_num}, '{nick_name}')
         """.format(id=id, user_name=form.user_name.data, pw=hashed_pw, student_num=form.student_num.data, nick_name=form.nick_name.data)
         print(sql)
         cursor.execute(sql)
+        print('데이터 삽입')
         db.commit()
+        print('커밋')
         db.close()
+        print('db close')
         return jsonify(result='true')
 
 @bp.route('/login/', methods=['POST'])
