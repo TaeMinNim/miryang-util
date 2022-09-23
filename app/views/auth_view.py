@@ -1,16 +1,23 @@
-from flask import Blueprint, request, flash, redirect, url_for, render_template, g, session, jsonify
-from app.forms import Signup_Form
+from flask import Blueprint, request, flash, redirect, url_for, render_template, g, session, jsonify, make_response
+from app.forms import Signup_Form,Login_Form
 from datetime import datetime
+from config.development import SECRET_KEY
 import pymysql
+import bcrypt
+import jwt
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
+def db_connection():
+    db = pymysql.connect(host='localhost', port=3306, user='dbuser', passwd='!miryangUTIL2022',db='UTILITY_SERVICE', charset='utf8')
+    return db
+
 @bp.route('/username-overlap-check/')
 def usernameOverlapCheck():
-    username = request.args['user_name']
-    db = pymysql.connect(host='localhost', port=3306, user='dbuser', passwd='!miryangUTIL2022',db='UTILITY_SERVICE', charset='utf8')
+    user_name = request.args['user_name']
+    db = db_connection()
     cursor = db.cursor()
-    sql = "SELECT id FROM SERVICE_USER WHERE username = '{username}'".format(username=username)
+    sql = "SELECT id FROM SERVICE_USER WHERE user_name = '{user_name}'".format(user_name=user_name)
     user = cursor.execute(sql)
     db.close()
     if user == 0:
@@ -20,10 +27,10 @@ def usernameOverlapCheck():
 
 @bp.route('/studentnum-overlap-check/')
 def studentnumOverlapCheck():
-    studentnum = request.args['student_num']
-    db = pymysql.connect(host='localhost', port=3306, user='dbuser', passwd='!miryangUTIL2022', db='UTILITY_SERVICE', charset='utf8')
+    student_num = request.args['student_num']
+    db = db_connection()
     cursor = db.cursor()
-    sql = "SELECT id FROM SERVICE_USER WHERE student_num = {studentnum}".format(studentnum=studentnum)
+    sql = "SELECT id FROM SERVICE_USER WHERE student_num = {student_num}".format(student_num=student_num)
     user = cursor.execute(sql)
     db.close()
     if user == 0:
@@ -33,10 +40,10 @@ def studentnumOverlapCheck():
 
 @bp.route('/nickname-overlap-check/')
 def nicknameOverlapCheck():
-    nickname = request.args['nickname']
-    db = pymysql.connect(host='localhost', port=3306, user='dbuser', passwd='!miryangUTIL2022', db='UTILITY_SERVICE', charset='utf8')
+    nick_name = request.args['nick_name']
+    db = db_connection()
     cursor = db.cursor()
-    sql = "SELECT id FROM SERVICE_USER WHERE nickname = '{nickname}'".format(nickname=nickname)
+    sql = "SELECT id FROM SERVICE_USER WHERE nick_name = '{nick_name}'".format(nick_name=nick_name)
     user = cursor.execute(sql)
     db.close()
     if user == 0:
@@ -48,20 +55,49 @@ def nicknameOverlapCheck():
 def signup():
     form = Signup_Form()
     if request.method == 'POST':
-        db = pymysql.connect(host='localhost', port=3306, user='dbuser', passwd='!miryangUTIL2022', db='UTILITY_SERVICE', charset='utf8')
+        db = db_connection()
         cursor = db.cursor()
         id = int(round(datetime.today().timestamp() * 1000))
-        print(id, form.username.data, form.pw.data, form.student_num.data, form.nickname.data)
-        print(type(form.student_num.data))
+
+        hashed_pw = bcrypt.hashpw(form.pw.data.encode('utf-8'), bcrypt.gensalt())
+        hashed_pw = hashed_pw.decode('utf-8')
         sql = """INSERT INTO SERVICE_USER 
-        (id, username, pw, student_num, nickname) VALUE({id}, '{username}', '{pw}', {student_num}, '{nickname}')
-        """.format(id=id, username=form.username.data, pw=form.pw.data, student_num=form.student_num.data, nickname=form.nickname.data)
+        (id, user_name, pw, student_num, nick_name) VALUE({id}, '{user_name}', '{pw}', {student_num}, '{nick_name}')
+        """.format(id=id, user_name=form.user_name.data, pw=hashed_pw, student_num=form.student_num.data, nick_name=form.nick_name.data)
         print(sql)
         cursor.execute(sql)
         db.commit()
         db.close()
-        return ('성공')
+        return jsonify(result='true')
 
+@bp.route('/login/', methods=['POST'])
+def login():
+    if request.method == 'POST':
+        db = db_connection()
+        cursor = db.cursor()
+        form = Login_Form()
+        print(form.user_name.data)
+        print(form.pw.data)
+        sql = "SELECT id, pw FROM SERVICE_USER WHERE user_name = '{user_name}'".format(user_name=form.user_name.data)
+        cursor.execute(sql)
 
+        data = cursor.fetchall()
+        id = data[0][0]
+        hashed_pw = data[0][1]
+        request_pw = form.pw.data.encode('utf-8')
+        result=bcrypt.checkpw(request_pw, hashed_pw.encode('utf-8'))
+
+        if result:
+            data = {
+                'id' : id
+            }
+            token = jwt.encode(data, SECRET_KEY)
+
+            response = make_response({'result' : 'true'})
+            response.headers['Content-Type'] = 'Application/json'
+            response.headers['Authentication'] = 'Bearer {token}'.format(token=token)
+            return response
+        else:
+            return '로그인 실패'
 
 
