@@ -53,8 +53,11 @@ def nicknameOverlapCheck():
 
 @bp.route('/signup/', methods=['POST'])
 def signup():
+    print('request')
     form = Signup_Form()
+    print('form check')
     if request.method == 'POST':
+        print('if')
         db = db_connection()
         print('db connect')
         cursor = db.cursor()
