@@ -59,7 +59,7 @@ def signup():
     print('request')
     json = request.get_json()
     print(json)
-    form = Signup_Form.form_json(json)
+    form = Signup_Form.from_json(json)
     print('form check')
     if request.method == 'POST':
         print('if')
