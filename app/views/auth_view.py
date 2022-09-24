@@ -1,11 +1,14 @@
-from flask import Blueprint, request, flash, redirect, url_for, render_template, g, session, jsonify, make_response
+from flask import Blueprint, request, jsonify, make_response
+from wtforms_json import from_json
 from app.forms import Signup_Form,Login_Form
 from datetime import datetime
 from config.development import SECRET_KEY
 import pymysql
 import bcrypt
 import jwt
+import wtforms_json
 
+wtforms_json.init()
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 def db_connection():
@@ -54,7 +57,9 @@ def nicknameOverlapCheck():
 @bp.route('/signup', methods=['POST'])
 def signup():
     print('request')
-    form = Signup_Form()
+    json = request.get_json()
+    print(json)
+    form = Signup_Form.form_json(json)
     print('form check')
     if request.method == 'POST':
         print('if')

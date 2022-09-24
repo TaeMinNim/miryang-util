@@ -2,11 +2,11 @@ from flask_wtf import FlaskForm
 from wtforms import Form, StringField, TimeField, IntegerField, EmailField
 from wtforms.validators import DataRequired, Email
 
-class Signup_Form(FlaskForm):
-    user_name = StringField("아이디", [DataRequired()], name="user_name")
-    pw = StringField("비밀번호", [DataRequired()], name="pw")
-    nick_name = StringField("닉네임", [DataRequired()], name="nick_name")
-    student_num = IntegerField("학번", [DataRequired()], name="student_num")
+class Signup_Form(Form):
+    user_name = StringField("user_name", [DataRequired()])
+    pw = StringField("pw", [DataRequired()])
+    nick_name = StringField("nick_name", [DataRequired()])
+    student_num = IntegerField("student_num", [DataRequired()])
 
 class Login_Form(FlaskForm):
     user_name = StringField("아이디", [DataRequired()], name="user_name")
