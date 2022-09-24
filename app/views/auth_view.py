@@ -12,7 +12,7 @@ def db_connection():
     db = pymysql.connect(host='localhost', port=3306, user='dbuser', passwd='!miryangUTIL2022',db='UTILITY_SERVICE', charset='utf8')
     return db
 
-@bp.route('/username-overlap-check/')
+@bp.route('/username-overlap-check')
 def usernameOverlapCheck():
     user_name = request.args['user_name']
     db = db_connection()
@@ -25,7 +25,7 @@ def usernameOverlapCheck():
     else:
         return jsonify(response=True)
 
-@bp.route('/studentnum-overlap-check/')
+@bp.route('/studentnum-overlap-check')
 def studentnumOverlapCheck():
     student_num = request.args['student_num']
     db = db_connection()
@@ -38,7 +38,7 @@ def studentnumOverlapCheck():
     else:
         return jsonify(response=True)
 
-@bp.route('/nickname-overlap-check/')
+@bp.route('/nickname-overlap-check')
 def nicknameOverlapCheck():
     nick_name = request.args['nick_name']
     db = db_connection()
@@ -51,7 +51,7 @@ def nicknameOverlapCheck():
     else:
         return jsonify(response=True)
 
-@bp.route('/signup/', methods=['POST'])
+@bp.route('/signup', methods=['POST'])
 def signup():
     print('request')
     form = Signup_Form()
@@ -79,7 +79,7 @@ def signup():
         print('db close')
         return jsonify(result='true')
 
-@bp.route('/login/', methods=['POST'])
+@bp.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
         db = db_connection()
