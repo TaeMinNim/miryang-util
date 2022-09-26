@@ -1,19 +1,14 @@
-from flask import Blueprint, request, jsonify, make_response
-from wtforms_json import from_json
+from flask import Blueprint, request, jsonify, make_response, g
 from app.forms import Signup_Form,Login_Form
 from datetime import datetime
 from config.development import SECRET_KEY
-import pymysql
+from app import db_connection
 import bcrypt
 import jwt
 import wtforms_json
 
 wtforms_json.init()
 bp = Blueprint('auth', __name__, url_prefix='/auth')
-
-def db_connection():
-    db = pymysql.connect(host='localhost', port=3306, user='dbuser', passwd='!miryangUTIL2022',db='UTILITY_SERVICE', charset='utf8')
-    return db
 
 @bp.route('/username-overlap-check')
 def usernameOverlapCheck():
@@ -56,62 +51,74 @@ def nicknameOverlapCheck():
 
 @bp.route('/signup', methods=['POST'])
 def signup():
-    print('request')
     json = request.get_json()
-    print(json)
     form = Signup_Form.from_json(json)
-    print('form check')
     if request.method == 'POST':
-        print('if')
         db = db_connection()
-        print('db connect')
         cursor = db.cursor()
-        print('cursor success')
         id = int(round(datetime.today().timestamp() * 1000))
 
         hashed_pw = bcrypt.hashpw(form.pw.data.encode('utf-8'), bcrypt.gensalt())
         hashed_pw = hashed_pw.decode('utf-8')
-        print('pw hashed')
         sql = """INSERT INTO SERVICE_USER 
         (id, user_name, pw, student_num, nick_name) VALUE({id}, '{user_name}', '{pw}', {student_num}, '{nick_name}')
         """.format(id=id, user_name=form.user_name.data, pw=hashed_pw, student_num=form.student_num.data, nick_name=form.nick_name.data)
-        print(sql)
-        cursor.execute(sql)
-        print('data insert')
-        db.commit()
-        print('db commit')
-        db.close()
-        print('db close')
-        return jsonify(result='true')
+
+        try:
+            cursor.execute(sql)
+        except Exception as e:
+            result = jsonify(result='false')
+        else:
+            db.commit()
+            result = jsonify(result='true')
+        finally:
+            db.close()
+            return result
+
 
 @bp.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
         db = db_connection()
         cursor = db.cursor()
-        form = Login_Form()
-        print(form.user_name.data)
-        print(form.pw.data)
+        json = request.get_json()
+        form = Login_Form.from_json(json)
+
+
         sql = "SELECT id, pw FROM SERVICE_USER WHERE user_name = '{user_name}'".format(user_name=form.user_name.data)
-        cursor.execute(sql)
+        if cursor.execute(sql):
+            data = cursor.fetchall()
 
-        data = cursor.fetchall()
-        id = data[0][0]
-        hashed_pw = data[0][1]
-        request_pw = form.pw.data.encode('utf-8')
-        result=bcrypt.checkpw(request_pw, hashed_pw.encode('utf-8'))
+            id = data[0][0]
+            hashed_pw = data[0][1]
+            request_pw = form.pw.data.encode('utf-8')
+            compare_pw = bcrypt.checkpw(request_pw, hashed_pw.encode('utf-8'))
 
-        if result:
-            data = {
-                'id' : id
-            }
-            token = jwt.encode(data, SECRET_KEY)
+            if compare_pw:
+                data = {
+                    'id' : id
+                }
+                token = jwt.encode(data, SECRET_KEY)
 
-            response = make_response({'result' : 'true'})
-            response.headers['Content-Type'] = 'Application/json'
-            response.headers['Authentication'] = 'Bearer {token}'.format(token=token)
-            return response
+                response = make_response({'result' : 'true'})
+                response.headers['Content-Type'] = 'Application/json'
+                response.headers['Authentication'] = 'Bearer {token}'.format(token=token)
+            else:
+                response = make_response({'result' : 'fasle'})
         else:
-            return '로그인 실패'
+            response = make_response({'result' : 'fasle'})
+        return response
 
-
+'''@bp.before_request
+def analyze_token():
+    try:
+        token = request.headers['Authorization']
+    except Exception as e:
+        return ('Access Denied!', 500)
+    else:
+        try:
+            decoded_token = jwt.decode(token, SECRET_KEY, algorithms='HS256')
+        except Exception as e:
+            return ('Not valid token', 500)
+        else:
+            g.user_id = decoded_token['id']'''

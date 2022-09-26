@@ -1,4 +1,9 @@
 from flask import Flask
+import pymysql
+def db_connection():
+    db = pymysql.connect(host='localhost', port=3306, user='dbuser', passwd='!miryangUTIL2022',db='UTILITY_SERVICE', charset='utf8')
+    return db
+
 
 def create_app():
     app = Flask(__name__)
