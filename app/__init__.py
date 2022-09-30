@@ -1,23 +1,20 @@
 from flask import Flask
-from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
+import pymysql
+def db_connection():
+    db = pymysql.connect(host='localhost', port=3306, user='dbuser', passwd='!miryangUTIL2022',db='UTILITY_SERVICE', charset='utf8')
+    return db
 
-import config
-
-db = SQLAlchemy()
-migrate = Migrate()
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(config)
+    app.config.from_envvar('APP_CONFIG_FILE')
 
-    db.init_app(app)
-    migrate.init_app(app,db)
-
-    from app.views import auth_view, main_view, order_view
+    from app.views import auth_view, main_view, order_view, test_veiw, admin_veiw
     app.register_blueprint(main_view.bp)
     app.register_blueprint(auth_view.bp)
     app.register_blueprint(order_view.bp)
+    app.register_blueprint(test_veiw.bp)
+    app.register_blueprint(admin_veiw.bp)
 
     return app
 
