@@ -11,11 +11,6 @@ class Signup_Form(Form):
 class Login_Form(Form):
     user_name = StringField("user_name", [DataRequired()])
     pw = StringField("pw", [DataRequired()])
-class Create_Group_Form(FlaskForm):
-    store = StringField('가게명', [DataRequired()], name="store")
-    time = TimeField('시간', [DataRequired()], name="time")
-    account_number = StringField('계좌번호', [DataRequired()], name="account-number")
-    delivery_cost = IntegerField('배달비', validators=[DataRequired()], name="delivery-cost")
 
 class Posting_Form(Form):
     store_id = IntegerField('store_id', [DataRequired()])
@@ -25,7 +20,32 @@ class Posting_Form(Form):
     max_member = IntegerField('max_member', [DataRequired()])
 
 
-class Order_Form(Form):
-    menu = StringField('menu', [DataRequired()])
-    quantity = IntegerField('qunatity', [DataRequired()])
-    option = StringField('option')
+class Add_Store_Form(Form):
+    store_name = StringField('store_name', [DataRequired()])
+    fee = IntegerField('fee', [DataRequired()])
+    min_order = IntegerField('min_order', [DataRequired()])
+
+class Add_Section_Form(Form):
+    store_id = IntegerField('store_id', [DataRequired()])
+    section_name = StringField('section_name', [DataRequired()])
+
+class Add_Menu_Form(Form):
+    store_id = IntegerField('store_id', [DataRequired()])
+    section_id = IntegerField('section_id', [DataRequired()])
+    menu_name = StringField('menu_name', [DataRequired()])
+    price = IntegerField('price', [DataRequired()])
+
+class Add_Group_Form(Form):
+    menu_id = IntegerField('menu_id', [DataRequired()])
+    group_name = StringField('area_name', [DataRequired()])
+    min_orderable_quantity = IntegerField('min_orderable_quantity', [DataRequired()])
+    max_orderable_quantity = IntegerField('max_orderable_quantity', [DataRequired()])
+class Add_Option_Form(Form):
+    store_id = IntegerField('store_id', [DataRequired()])
+    area_id = IntegerField('area_id', [DataRequired()])
+    option_name = StringField('option_name', [DataRequired()])
+    price = IntegerField('price', [DataRequired()])
+
+class Add_Option_Group_Mapping_Form(Form):
+    group_id = IntegerField('group_id', [DataRequired()])
+    option_id = IntegerField('option_id', [DataRequired()])

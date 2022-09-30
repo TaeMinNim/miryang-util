@@ -109,16 +109,16 @@ def login():
             response = make_response({'result' : 'fasle'})
         return response
 
-'''@bp.before_request
+@bp.before_app_request
 def analyze_token():
     try:
         token = request.headers['Authorization']
     except Exception as e:
-        return ('Access Denied!', 500)
+        g.user_id = None
     else:
         try:
             decoded_token = jwt.decode(token, SECRET_KEY, algorithms='HS256')
         except Exception as e:
             return ('Not valid token', 500)
         else:
-            g.user_id = decoded_token['id']'''
+            g.user_id = decoded_token['id']
