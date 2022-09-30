@@ -58,7 +58,7 @@ def delivery_select():
         response_json.append({'store_id' : data[0],
                               'store_name' : data[1],
                               'fee' : data[2]})
-        response = make_response(json.dumps(response_json))
+    response = make_response(json.dumps(response_json))
     return response
 
 
