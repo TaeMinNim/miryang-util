@@ -1,206 +1,387 @@
-from flask import Blueprint, request, g, redirect, url_for, make_response
+from flask import Blueprint, request, g, make_response, jsonify
 from app.forms import Posting_Form
 from datetime import datetime
 import wtforms_json
-from app import db_connection
 import json
+from bson import ObjectId
+from pymongo import MongoClient, ReturnDocument
 
 bp = Blueprint('order',__name__, url_prefix='/order')
 wtforms_json.init()
 
-@bp.route('/posting', methods=['POST'])
+#가게 조회 관련
+
+#201
+@bp.route('/store/list')
+def delivery_store_list():
+    if not g.user_id:
+        return ('access denied', 500)
+
+    client = MongoClient(host='localhost', port=27017)
+    db = client['delivery']
+
+    projection={
+        'menu': False
+    }
+    store_list = db.delivery_store.find({}, projection)
+
+    json_list = []
+    for store in store_list:
+        store_json={
+            'store_id': str(store['_id']),
+            'store_name': store['store_name'],
+            'fee': store['fee']
+        }
+        json_list.append(store_json)
+
+    response = {
+        'delivery_stores': json_list
+    }
+    return make_response(json.dumps(response, ensure_ascii=False))
+
+#202
+@bp.route('/menu/list')
+def delivery_menu_list():
+    if not g.user_id:
+        return ('access denied', 500)
+
+    client = MongoClient(host='localhost', port=27017)
+    db = client['delivery']
+
+    store_id = request.args['store_id']
+
+    find={
+        '_id': ObjectId(store_id)
+    }
+    project={
+        'menus': {
+            'section_name': True,
+            'menu_name': True,
+            'menu_price': True
+        }
+    }
+    menu_list = db.delivery_store.find_one(find, project)['menus']
+    json_list = []
+
+    #Dictionary 형태로 section_name, index를 key:value 형태로 저장
+    section_index = {}
+    for menu in menu_list:
+        print(menu)
+        if menu['section_name'] in section_index:
+            index = section_index[menu['section_name']]
+            menu_json = {
+                'menu_name': menu['menu_name'],
+                'menu_price': menu['menu_price']
+            }
+            json_list[index]['menus'].append(menu_json)
+
+        else:
+            section_menu_json = {
+                'section_name': menu['section_name'],
+                'menus': [{
+                    'menu_name': menu['menu_name'],
+                    'menu_price': menu['menu_price']
+                }]
+            }
+            json_list.append(section_menu_json)
+            section_index[menu['section_name']] = len(json_list) - 1
+
+    return make_response(json.dumps(json_list, ensure_ascii=False))
+
+#203
+@bp.route('/menu/detail')
+def delivery_menu_detail():
+    if not g.user_id:
+        return ('access denied', 500)
+    client = MongoClient(host='localhost', port=27017)
+    db = client['delivery']
+
+    store_id= request.args['store_id']
+    menu_name = request.args['menu_name']
+
+    find={
+        '_id': ObjectId(store_id),
+    }
+    project={
+        'menus':{
+            '$elemMatch': {'menu_name': menu_name}
+        }
+    }
+    print(db.delivery_store.find_one(find, project))
+    menu_detail = db.delivery_store.find_one(find, project)['menus'][0]
+    return make_response(json.dumps(menu_detail, ensure_ascii=False))
+
+#포스팅 관련
+
+#204
+@bp.route('/post/posting', methods=['POST'])
 def delivery_posting():
     if not g.user_id:
         return ('access denied', 500)
-    db = db_connection()
-    cursor = db.cursor()
+
+    client = MongoClient(host='localhost', port=27017)
+    db = client['delivery']
 
     json = request.get_json()
-    print(json)
     form = Posting_Form.from_json(json)
 
-    today = datetime.today()
-    print(datetime.now())
-    id = int(round(today.timestamp() * 1000))
-    sql = """
-    INSERT INTO DELIVERY_POST (id, user_id, store_id, title, content, order_time, current_member, min_member, max_member, is_closed)
-    VALUE({id}, {user_id}, {store_id}, '{title}', '{content}', '{order_time}', {current_member}, {min_member}, {max_member}, {is_closed})""".format(
-        id=id,
-        user_id=g.user_id,
-        store_id=form.store_id.data,
-        title=form.title.data,
-        content=form.content.data,
-        order_time=datetime.now(),
-        current_member=1,
-        min_member=form.min_member.data,
-        max_member=form.max_member.data,
-        is_closed=0
-        )
-    print(sql)
-    cursor.execute(sql)
-    db.commit()
-    db.close()
-    return ('',204)
+    find={'_id': ObjectId(form.store_id.data)}
+    projection={'menus': False}
+    store = db.delivery_store.find_one(find,projection)
 
-@bp.route('/store-list')
-def delivery_select():
+    today = datetime.now()
+    data = {
+        'user_id': g.user_id,
+        'nick_name': g.nick_name,
+        'store': store,
+        'title': form.title.data,
+        'content': form.content.data,
+        'place': form.place.data,
+        'order_time': form.order_time.data,
+        'min_member': form.min_member.data,
+        'max_member': form.max_member.data,
+        'current_member': 1,
+        'update_date': today.strftime('%Y/%m/%d %H:%M:%S'),
+        'views': 0,
+        'is_closed': False,
+        'orders': []
+    }
+
+    _id = db.delivery_post.insert_one(data)
+    post_id = str(_id.inserted_id)
+
+    return jsonify(post_id=post_id)
+
+#206
+@bp.route('/post/update', methods=['GET', 'PATCH'])
+def delivery_post_update():
     if not g.user_id:
         return ('access denied', 500)
-    db = db_connection()
-    cursor = db.cursor()
-    sql = '''SELECT id, store_name, fee FROM DELIVERY_STORE'''
 
-    cursor.execute(sql)
-    list = cursor.fetchall()
-    db.close()
-    response_json = []
-    for data in list:
-        response_json.append({'store_id' : data[0],
-                              'store_name' : data[1],
-                              'fee' : data[2]})
-    response = make_response(json.dumps(response_json))
-    return response
+    client = MongoClient(host='localhost', port=27017)
+    db = client['delivery']
+    if request.method == 'GET':
+        post_id = request.args['post_id']
 
+        find = {
+            '_id': ObjectId(post_id)
+        }
+        projection = {
+            '_id': False,
+            'title': True,
+            'content': True,
+            'order_time': True,
+            'place': True,
+            'min_member': True,
+            'max_member': True
+        }
+        post = db.delivery_post.find_one(find, projection)
 
-@bp.route('/section-menu-select')
-def delivery_section_menu_select():
+        return make_response(json.dumps(post, ensure_ascii=False))
+
+    update_data = request.get_json()
+    print(update_data)
+    post_id = update_data['post_id']
+    find = {
+        '_id': ObjectId(post_id)
+    }
+    update={
+        '$set': {
+            'title': update_data['title'],
+            'content': update_data['content'],
+            'order_time': update_data['order_time'],
+            'place': update_data['place'],
+            'min_member': update_data['min_member'],
+            'max_member': update_data['max_member']
+        }
+    }
+    db.delivery_post.update_one(find, update)
+    return jsonify(post_id=post_id)
+@bp.route('/post/list')
+def delivery_post_list():
     if not g.user_id:
         return ('access denied', 500)
-    db = db_connection()
-    cursor = db.cursor()
-    store_id = request.args['store_id']
-    menu_list_sql = '''
-    WITH 
-    section_selected AS (
-        SELECT * 
-        FROM delivery_section 
-            WHERE store_id = {store_id}
-        )
-    SELECT 
-        S.id as section_id, 
-        S.section_name, M.id as menu_id, 
-        M.menu_name,
-        M.price  
-    FROM section_selected S JOIN  delivery_menu M ON (S.id = M.section_id)
-    '''.format(store_id=store_id)
+    client = MongoClient(host='localhost', port=27017)
+    db = client['delivery']
 
-    cursor.execute(menu_list_sql)
-    menu_list = cursor.fetchall()
-    section_menu_list = []
-    section_index = {}
-    def create_menu(menu_id, menu_name, menu_price):
-        menu = {
-            'menu_id': menu_id,
-            'menu_name': menu_name,
-            'menu_price': menu_price
-        }
-        return menu
-    def create_section(section_id, section_name, menu):
-        section_menu = {
-            'section_id': section_id,
-            'section_name': section_name,
-            'menu_list': [menu]
-        }
-        return section_menu
+    projection = {
+        'content': False,
+        'orders': False
+    }
+    post_list = db.delivery_post.find({}, projection)
+    return make_response(json.dumps(post_list, ensure_ascii=False))
 
-    for menu in menu_list:
-        section_id = menu[0]
-        section_name = menu[1]
-        menu_id = menu[2]
-        menu_name = menu[3]
-        menu_price = menu[4]
-        if section_id in section_index:
-            menu = create_menu(menu_id, menu_name, menu_price)
-            index = section_index[section_id]
-            section_menu_list[index]['menu_list'].append(menu)
-        else:
-            section = create_section(section_id, section_name, create_menu(menu_id, menu_name, menu_price))
-            section_menu_list.append(section)
-            section_index[section_id] = len(section_menu_list) - 1
-
-    return make_response(json.dumps(section_menu_list))
-
-@bp.route('/group-option-select')
-def delivery_group_option_select():
+#205
+@bp.route('/post/detail/<string:post_id>')
+def delivery_post_detail(post_id):
     if not g.user_id:
         return ('access denied', 500)
-    db = db_connection()
-    cursor = db.cursor()
-    menu_id = request.args['menu_id']
 
-    menu_list_sql = '''
-    WITH 
-    group_selected AS (
-        SELECT 
-            id,
-            group_name,
-            min_orderable_quantity,
-            max_orderable_quantity
-        FROM delivery_group
-            WHERE menu_id = {menu_id}
-        ),
-    group_option_mapping AS (
-        SELECT 
-            G.id AS group_id, 
-            G.group_name,
-            G.min_orderable_quantity,
-            G.max_orderable_quantity,
-            MAP.option_id 
-        FROM group_selected G JOIN delivery_option_group_mapping MAP 
-            ON (G.id = MAP.group_id)
-        )
-    SELECT 
-        MAP.group_id, 
-        MAP.group_name, 
-        MAP.min_orderable_quantity,
-        MAP.max_orderable_quantity,
-        O.id AS option_id,
-        O.option_name,
-        O.price
-    FROM group_option_mapping MAP JOIN delivery_option O
-        ON (MAP.option_id = O.id)
-    '''.format(menu_id=menu_id)
+    client = MongoClient(host='localhost', port=27017)
+    db = client['delivery']
 
-    cursor.execute(menu_list_sql)
-    option_list = cursor.fetchall()
+    find = {
+        '_id': ObjectId(post_id)
+    }
+    update = {
+        '$inc': { 'views': 1 }
+    }
 
+    post = db.delivery_post.find_one_and_update(find, update, return_document=ReturnDocument.AFTER)
 
-    def create_option(option_id, option_name, option_price):
-        option = {
-            'option_id': option_id,
-            'option_name': option_name,
-            'option_price': option_price
+    post['_id'] = str(post['_id'])
+    post['store']['_id'] = str(post['store']['_id'])
+
+    return make_response(json.dumps(post, ensure_ascii=False))
+@bp.route('/post/condition-switch', methods=['PATCH'])
+def delivery_post_condition_switch():
+    json = request.get_json()
+    post_id = json['post_id']
+
+    client = MongoClient(host='localhost', port=27017)
+    db = client['delivery']
+
+    find = {
+        '_id': ObjectId(post_id)
+    }
+    post = db.delivery_post.find_one(find)
+
+    update = {
+        '$set': { 'is_closed' : not post['is_closed'] }
+    }
+    db.delivery_post.update_one(find, update)
+
+    return redirect(url_for('order.delivery_post_detail', post_id=post_id))
+
+#주문하기 관련
+@bp.route('/ordering', methods=['POST'])
+def delivery_ordering():
+    if not g.user_id:
+        return ('access denied', 500)
+
+    client = MongoClient(host='localhost', port=27017)
+    db = client['delivery']
+
+    order = request.get_json()
+    store_id = order['store_id']
+    post_id = order['post_id']
+    orders = order['orders']
+
+    menus = []
+    groups = []
+    options = []
+
+    for order in orders:
+        menus.append(order['menu_name'])
+        for group in order['groups']:
+            groups.append(group['group_id'])
+            options = options + group['options']
+
+    pipe1 = {
+        '$match': {
+            '_id': ObjectId(store_id)
         }
-        return option
-    def create_group(group_id, group_name, min_orderable_quantity, max_orderable_quantity, option):
-        group_option = {
-            'group_id': group_id,
-            'group_name': group_name,
-            'min_orderable_quantity' : min_orderable_quantity,
-            'max_orderable_quantity' : max_orderable_quantity,
-            'option_list': [option]
+    }
+
+    pipe2 = {
+        '$unwind': '$menus'
+    }
+
+    pipe3 = {
+        '$unwind': '$menus.groups'
+    }
+
+    pipe4 = {
+        '$unwind': '$menus.groups.options'
+    }
+
+    pipe5 = {
+        '$match': {
+            'menus.menu_name': { '$in': menus },
+            'menus.groups.group_id': { '$in': groups },
+            'menus.groups.options.option_id': { '$in': options }
         }
-        return group_option
+    }
+    pipe6 = {
+        '$group': {
+            '_id': {
+                'group_id': '$menus.groups.group_id',
+                'menu_name': '$menus.menu_name',
+                'menu_price': '$menus.menu_price'
+            },
+            'group_id': { '$first': '$menus.groups.group_id'},
+            "group_name": { '$first': '$menus.groups.group_name'},
+            'min_orderable_quantity': { '$first': '$menus.groups.min_orderable_quantity'},
+            'max_orderable_quantity': { '$first': '$menus.groups.max_orderable_quantity'},
+            'options': {
+                '$push': {
+                    'option_id': '$menus.groups.options.option_id',
+                    'option_name': '$menus.groups.options.option_name',
+                    'option_price': '$menus.groups.options.option_price'
+                }
+            }
+        }
+    }
 
-    group_option_list = []
-    group_index = {}
-    for option in option_list:
-        group_id = option[0]
-        group_name = option[1]
-        min_orderable_quantity = option[2]
-        max_orderable_quantity = option[3]
-        option_id = option[4]
-        option_name = option[5]
-        option_price = option[6]
-        if group_id in group_index:
-            option = create_option(option_id, option_name, option_price)
-            index = group_index[group_id]
-            group_option_list[index]['option_list'].append(option)
-        else:
-            group = create_group(group_id, group_name, min_orderable_quantity, max_orderable_quantity,
-                                   create_option(option_id, option_name, option_price))
-            group_option_list.append(group)
-            group_index[group_id] = len(group_option_list) - 1
+    pipe7 = {
+        '$group': {
+            '_id': '$_id.menu_name',
+            'menu_name': { '$first': '$_id.menu_name'},
+            'menu_price': { '$first': '$_id.menu_price'},
+            'groups': {
+                '$push': {
+                    "group_id": "$group_id",
+                    "group_name": "$group_name",
+                    "min_orderable_quantity": "$min_orderable_quantity",
+                    "max_orderable_quantity": "$max_orderable_quantity",
+                    "options": '$options'
+                }
+            }
+        }
+    }
 
-    return make_response(json.dumps(group_option_list))
+    menu_list = list(db.delivery_store.aggregate([pipe1, pipe2, pipe3, pipe4, pipe5, pipe6, pipe7]))
+    def find_option_price(menu_index, group_index, option_id):
+        for option in menu_list[menu_index]['groups'][group_index]['options']:
+            if option['option_id'] == option_id:
+                return option['option_name'], option['option_price']
+    def find_group_index(menu_index, group_id):
+        for group_index, group in enumerate(menu_list[menu_index]['groups']):
+            if group_id == group['group_id']:
+                return group_index, group['group_name']
+    def find_menu_price(menu_name):
+        for menu_index, menu in enumerate(menu_list):
+            if menu['menu_name'] == menu_name:
+                return menu_index, menu['menu_price']
+
+    for order in orders:
+        menu_index, order['menu_price'] = find_menu_price(order['menu_name'])
+        for group in order['groups']:
+            group_index, group['group_name'] = find_group_index(menu_index, group['group_id'])
+            for index, option in enumerate(group['options']):
+                option_name, option_price = find_option_price(menu_index, group_index, option)
+                option_set = {
+                    'option_id': option,
+                    'option_name': option_name,
+                    'option_price': option_price
+                }
+                del group['options'][index]
+                group['options'].insert(index, option_set)
+
+    user_order = {
+        'user_id': g.user_id,
+        'orders': orders
+    }
+
+    find = {
+        '_id': ObjectId(post_id)
+    }
+
+    update = {
+        '$push': { 'orders': user_order }
+    }
+    db.delivery_post.update_one(find, update)
+    return jsonify(post_id=post_id)
+
+
 

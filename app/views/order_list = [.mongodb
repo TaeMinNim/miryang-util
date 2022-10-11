@@ -1,0 +1,16 @@
+use('delivery')
+find={
+        '_id': ObjectId('6345aa7b911ed10ac4cde368'),
+    }
+
+update={
+    $inc:{
+        'views': 1
+    }
+}
+
+
+
+db.delivery_post.find()
+//db.delivery_store.find()
+

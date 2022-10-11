@@ -1,0 +1,49 @@
+use('delivery')
+
+order_list = [
+    {
+        'quantity': 5,
+        'menu_name': '개맛있는 싸이버거',
+        'group': [{
+            'group_name': '음료변경',
+            'option': ['사이다']
+        }]
+    },
+    {
+      'quantity': 2,
+      'menu_name': '싸이버거',
+      'group': [{
+          'group_name': '음료변경',
+          'option': ['환타']
+      }]
+    }
+]
+
+pipe1 = {
+    $match: {
+        '_id': ObjectId('6341ed187070ee76a1139f52'),
+    },
+}
+
+pipe2 = {
+  $unwind: '$menus'
+}
+
+pipe3 = {
+  $unwind: '$menus.group'
+}
+
+pipe4 = {
+  $unwind: '$menus.group.option'
+}
+
+pipe4 = {
+  $project: {
+    
+  }
+}
+
+//db.delivery_store.find()
+db.delivery_store.aggregate([pipe1,pipe2,pipe3,pipe4])
+
+//db.delivery_post.find()
