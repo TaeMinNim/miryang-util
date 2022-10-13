@@ -1,16 +1,14 @@
 use('delivery')
-find={
-        '_id': ObjectId('6345aa7b911ed10ac4cde368'),
-    }
-
-update={
-    $inc:{
-        'views': 1
+find = {
+    '_id': ObjectId('6345aa7b911ed10ac4cde368')
+}
+projection = {
+    orders: {
+        $elemMatch: {'user_id': 1664180836860}
     }
 }
 
 
-
-db.delivery_post.find()
+db.delivery_post.find(find, projection)
 //db.delivery_store.find()
 

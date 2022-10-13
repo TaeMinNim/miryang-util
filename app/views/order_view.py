@@ -233,6 +233,8 @@ def delivery_post_detail(post_id):
     post['store']['_id'] = str(post['store']['_id'])
 
     return make_response(json.dumps(post, ensure_ascii=False))
+
+#207
 @bp.route('/post/condition-switch', methods=['PATCH'])
 def delivery_post_condition_switch():
     json = request.get_json()
@@ -251,9 +253,11 @@ def delivery_post_condition_switch():
     }
     db.delivery_post.update_one(find, update)
 
-    return redirect(url_for('order.delivery_post_detail', post_id=post_id))
+    return jsonify(post_id=post_id)
 
 #주문하기 관련
+
+#209
 @bp.route('/ordering', methods=['POST'])
 def delivery_ordering():
     if not g.user_id:
@@ -262,9 +266,72 @@ def delivery_ordering():
     client = MongoClient(host='localhost', port=27017)
     db = client['delivery']
 
-    order = request.get_json()
+    order_json = request.get_json()
+    post_id = order_json['post_id']
+
+    orders = pricing(order_json, db)
+
+    user_order = {
+        'user_id': g.user_id,
+        'orders': orders
+    }
+
+    find = {
+        '_id': ObjectId(post_id)
+    }
+
+    update = {
+        '$push': { 'orders': user_order }
+    }
+    db.delivery_post.update_one(find, update)
+    return jsonify(post_id=post_id)
+
+#210
+@bp.route('/ordering/update', methods=['GET', 'PATCH'])
+def delivery_ordering_update():
+    if not g.user_id:
+        return ('access denied', 500)
+
+    client = MongoClient(host='localhost', port=27017)
+    db = client['delivery']
+
+    if request.method == 'GET':
+        post_id = request.args['post_id']
+        find = {
+            '_id': ObjectId(post_id)
+        }
+        projection = {
+            'orders': {
+                '$elemMatch': {'user_id': g.user_id}
+            }
+        }
+        data = db.delivery_post.find_one(find, projection)
+        orders = data['orders'][0]
+        return make_response(json.dumps(orders, ensure_ascii=False))
+
+    update_json = request.get_json()
+    post_id = update_json['post_id']
+
+    orders = pricing(update_json, db)
+
+    find = {
+        '_id': ObjectId(post_id),
+        'orders': {
+            '$elemMatch': {
+                'user_id': g.user_id
+            }
+        }
+    }
+
+    update = {
+        '$set': { 'orders.$.orders': orders }
+    }
+
+    db.delivery_post.update_one(find, update)
+
+    return ('', 204)
+def pricing(order, db):
     store_id = order['store_id']
-    post_id = order['post_id']
     orders = order['orders']
 
     menus = []
@@ -297,9 +364,9 @@ def delivery_ordering():
 
     pipe5 = {
         '$match': {
-            'menus.menu_name': { '$in': menus },
-            'menus.groups.group_id': { '$in': groups },
-            'menus.groups.options.option_id': { '$in': options }
+            'menus.menu_name': {'$in': menus},
+            'menus.groups.group_id': {'$in': groups},
+            'menus.groups.options.option_id': {'$in': options}
         }
     }
     pipe6 = {
@@ -309,10 +376,10 @@ def delivery_ordering():
                 'menu_name': '$menus.menu_name',
                 'menu_price': '$menus.menu_price'
             },
-            'group_id': { '$first': '$menus.groups.group_id'},
-            "group_name": { '$first': '$menus.groups.group_name'},
-            'min_orderable_quantity': { '$first': '$menus.groups.min_orderable_quantity'},
-            'max_orderable_quantity': { '$first': '$menus.groups.max_orderable_quantity'},
+            'group_id': {'$first': '$menus.groups.group_id'},
+            "group_name": {'$first': '$menus.groups.group_name'},
+            'min_orderable_quantity': {'$first': '$menus.groups.min_orderable_quantity'},
+            'max_orderable_quantity': {'$first': '$menus.groups.max_orderable_quantity'},
             'options': {
                 '$push': {
                     'option_id': '$menus.groups.options.option_id',
@@ -326,8 +393,8 @@ def delivery_ordering():
     pipe7 = {
         '$group': {
             '_id': '$_id.menu_name',
-            'menu_name': { '$first': '$_id.menu_name'},
-            'menu_price': { '$first': '$_id.menu_price'},
+            'menu_name': {'$first': '$_id.menu_name'},
+            'menu_price': {'$first': '$_id.menu_price'},
             'groups': {
                 '$push': {
                     "group_id": "$group_id",
@@ -341,14 +408,17 @@ def delivery_ordering():
     }
 
     menu_list = list(db.delivery_store.aggregate([pipe1, pipe2, pipe3, pipe4, pipe5, pipe6, pipe7]))
+
     def find_option_price(menu_index, group_index, option_id):
         for option in menu_list[menu_index]['groups'][group_index]['options']:
             if option['option_id'] == option_id:
                 return option['option_name'], option['option_price']
+
     def find_group_index(menu_index, group_id):
         for group_index, group in enumerate(menu_list[menu_index]['groups']):
             if group_id == group['group_id']:
                 return group_index, group['group_name']
+
     def find_menu_price(menu_name):
         for menu_index, menu in enumerate(menu_list):
             if menu['menu_name'] == menu_name:
@@ -367,21 +437,4 @@ def delivery_ordering():
                 }
                 del group['options'][index]
                 group['options'].insert(index, option_set)
-
-    user_order = {
-        'user_id': g.user_id,
-        'orders': orders
-    }
-
-    find = {
-        '_id': ObjectId(post_id)
-    }
-
-    update = {
-        '$push': { 'orders': user_order }
-    }
-    db.delivery_post.update_one(find, update)
-    return jsonify(post_id=post_id)
-
-
-
+    return orders
