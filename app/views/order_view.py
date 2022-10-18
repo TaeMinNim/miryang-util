@@ -6,6 +6,8 @@ import json
 from bson import ObjectId
 from pymongo import MongoClient, ReturnDocument
 
+from app import db_connection
+
 bp = Blueprint('order',__name__, url_prefix='/order')
 wtforms_json.init()
 
@@ -34,10 +36,7 @@ def delivery_store_list():
         }
         json_list.append(store_json)
 
-    response = {
-        'delivery_stores': json_list
-    }
-    return make_response(json.dumps(response, ensure_ascii=False))
+    return make_response(json.dumps(json_list, ensure_ascii=False))
 
 #202
 @bp.route('/menu/list')
@@ -120,18 +119,19 @@ def delivery_posting():
         return ('access denied', 500)
 
     client = MongoClient(host='localhost', port=27017)
-    db = client['delivery']
+    mongo_db = client['delivery']
 
     json = request.get_json()
     form = Posting_Form.from_json(json)
 
     find={'_id': ObjectId(form.store_id.data)}
     projection={'menus': False}
-    store = db.delivery_store.find_one(find,projection)
+    store = mongo_db.delivery_store.find_one(find,projection)
 
     today = datetime.now()
     data = {
         'user_id': g.user_id,
+        'join_user': [g.user_id],
         'nick_name': g.nick_name,
         'store': store,
         'title': form.title.data,
@@ -147,7 +147,7 @@ def delivery_posting():
         'orders': []
     }
 
-    _id = db.delivery_post.insert_one(data)
+    _id = mongo_db.delivery_post.insert_one(data)
     post_id = str(_id.inserted_id)
 
     return jsonify(post_id=post_id)
@@ -179,6 +179,7 @@ def delivery_post_update():
 
         return make_response(json.dumps(post, ensure_ascii=False))
 
+
     update_data = request.get_json()
     print(update_data)
     post_id = update_data['post_id']
@@ -197,6 +198,39 @@ def delivery_post_update():
     }
     db.delivery_post.update_one(find, update)
     return jsonify(post_id=post_id)
+@bp.route('/post/join/condition-switch')
+def delivery_post_join():
+    if not g.user_id:
+        return ('access denied', 500)
+    client = MongoClient(host='localhost', port=27017)
+    db = client['delivery']
+
+
+    post_id = request.args['post_id']
+    find = {
+        '_id': ObjectId(post_id)
+    }
+    post = db.delivery_post.find_one(find)
+
+    if g.user_id == post['user_id']:
+        return ('대표자는 그룹을 탈퇴할 수 없습니다', 500)
+
+    if g.user_id in post['join_user']:
+        update = {
+            '$pull': {
+                'join_user': g.user_id
+            }
+        }
+    else:
+        update = {
+            '$push': {
+                'join_user': g.user_id
+            }
+        }
+    db.delivery_post.update_one(find, update)
+    return ('', 204)
+
+#213
 @bp.route('/post/list')
 def delivery_post_list():
     if not g.user_id:
@@ -209,6 +243,9 @@ def delivery_post_list():
         'orders': False
     }
     post_list = db.delivery_post.find({}, projection)
+    for post in post_list:
+        post['_id'] = str(post['_id'])
+        post['store']['_id'] = str(post['store']['_id'])
     return make_response(json.dumps(post_list, ensure_ascii=False))
 
 #205
@@ -266,6 +303,17 @@ def delivery_ordering():
     client = MongoClient(host='localhost', port=27017)
     db = client['delivery']
 
+    mysql_db = db_connection()
+    cursor = mysql_db.cursor()
+
+    sql = """
+        SELECT joined_delivery FROM user WHERE id = {user_id}
+        """.format(user_id=g.user_id)
+    select_result = cursor.execute(sql)
+
+    if select_result:
+        return ('참여한 그룹이 존재합니다', 500)
+
     order_json = request.get_json()
     post_id = order_json['post_id']
 
@@ -284,6 +332,14 @@ def delivery_ordering():
         '$push': { 'orders': user_order }
     }
     db.delivery_post.update_one(find, update)
+
+    sql = """
+        UPDATE service_user
+        SET joined_delivery = {post_id}
+        WHERE id = {user_id}
+        """.format(post_id=post_id, user_id=g.user_id)
+    cursor.execute(sql)
+
     return jsonify(post_id=post_id)
 
 #210
