@@ -1,7 +1,4 @@
 use('delivery');
-projection = {
-        'content': False,
-        'orders': False
-    }
-post_list = db.delivery_post.find({}, projection)
+
+post_list = db.delivery_post.find()
 

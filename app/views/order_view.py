@@ -140,7 +140,6 @@ def delivery_posting():
         'order_time': form.order_time.data,
         'min_member': form.min_member.data,
         'max_member': form.max_member.data,
-        'current_member': 1,
         'update_date': today.strftime('%Y/%m/%d %H:%M:%S'),
         'views': 0,
         'is_closed': False,
@@ -242,7 +241,7 @@ def delivery_post_list():
         'content': False,
         'orders': False
     }
-    post_list = db.delivery_post.find({}, projection)
+    post_list = list(db.delivery_post.find({}, projection))
     for post in post_list:
         post['_id'] = str(post['_id'])
         post['store']['_id'] = str(post['store']['_id'])
