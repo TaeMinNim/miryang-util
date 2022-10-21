@@ -10,7 +10,7 @@ import wtforms_json
 wtforms_json.init()
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-@bp.route('/username-overlap-check')
+@bp.route('/overlap/username')
 def usernameOverlapCheck():
     user_name = request.args['user_name']
     db = db_connection()
@@ -23,7 +23,7 @@ def usernameOverlapCheck():
     else:
         return jsonify(response=True)
 
-@bp.route('/studentnum-overlap-check')
+@bp.route('/overlap/studentnum')
 def studentnumOverlapCheck():
     student_num = request.args['student_num']
     db = db_connection()
@@ -36,7 +36,7 @@ def studentnumOverlapCheck():
     else:
         return jsonify(response=True)
 
-@bp.route('/nickname-overlap-check')
+@bp.route('/overlap/nickname')
 def nicknameOverlapCheck():
     nick_name = request.args['nick_name']
     db = db_connection()
