@@ -5,7 +5,7 @@ import wtforms_json
 from datetime import datetime
 
 
-from bson.objectid import  ObjectId
+from bson.objectid import ObjectId
 from pymongo import MongoClient
 
 bp = Blueprint('admin',__name__, url_prefix='/admin')
