@@ -53,6 +53,7 @@ def nicknameOverlapCheck():
 def signup():
     json = request.get_json()
     form = Signup_Form.from_json(json)
+    print(json)
     if request.method == 'POST':
         db = db_connection()
         cursor = db.cursor()
@@ -67,8 +68,11 @@ def signup():
         try:
             cursor.execute(sql)
         except Exception as e:
+            print('fail')
+            print(e)
             result = jsonify(result='false')
         else:
+            print('success')
             db.commit()
             result = jsonify(result='true')
         finally:
@@ -82,27 +86,30 @@ def login():
         db = db_connection()
         cursor = db.cursor()
         json = request.get_json()
+        print(json)
         form = Login_Form.from_json(json)
 
 
-        sql = "SELECT id, pw FROM SERVICE_USER WHERE user_name = '{user_name}'".format(user_name=form.user_name.data)
+        sql = "SELECT id, nick_name, pw FROM SERVICE_USER WHERE user_name = '{user_name}'".format(user_name=form.user_name.data)
         if cursor.execute(sql):
-            data = cursor.fetchall()
+            data = cursor.fetchall()[0]
 
-            id = data[0][0]
-            hashed_pw = data[0][1]
+            id = data[0]
+            nick_name = data[1]
+            hashed_pw = data[2]
             request_pw = form.pw.data.encode('utf-8')
             compare_pw = bcrypt.checkpw(request_pw, hashed_pw.encode('utf-8'))
 
             if compare_pw:
                 data = {
-                    'id' : id
+                    'id' : id,
+                    'nick_name': nick_name
                 }
                 token = jwt.encode(data, SECRET_KEY)
 
                 response = make_response({'result' : 'true'})
                 response.headers['Content-Type'] = 'Application/json'
-                response.headers['Authentication'] = 'Bearer {token}'.format(token=token)
+                response.headers['Authentication'] = '{token}'.format(token=token)
             else:
                 response = make_response({'result' : 'fasle'})
         else:
@@ -122,3 +129,4 @@ def analyze_token():
             return ('Not valid token', 500)
         else:
             g.user_id = decoded_token['id']
+            g.nick_name = decoded_token['nick_name']

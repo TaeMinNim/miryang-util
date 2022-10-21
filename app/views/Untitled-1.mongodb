@@ -1,0 +1,4 @@
+use('delivery');
+
+post_list = db.delivery_post.find()
+

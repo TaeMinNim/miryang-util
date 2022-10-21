@@ -13,11 +13,17 @@ class Login_Form(Form):
     pw = StringField("pw", [DataRequired()])
 
 class Posting_Form(Form):
-    store_id = IntegerField('store_id', [DataRequired()])
+    store_id = StringField('store_id', [DataRequired()])
     title = StringField('title', [DataRequired()])
     content = TextAreaField('content')
+    place = StringField('place', [DataRequired()])
+    order_time = StringField('order_time', [DataRequired()])
     min_member = IntegerField('min_member', [DataRequired()])
     max_member = IntegerField('max_member', [DataRequired()])
+
+class Order_Form(Form):
+    count = IntegerField('count', [DataRequired()])
+    menu_id = IntegerField('menu_id', [DataRequired()])
 
 
 class Add_Store_Form(Form):
@@ -25,27 +31,24 @@ class Add_Store_Form(Form):
     fee = IntegerField('fee', [DataRequired()])
     min_order = IntegerField('min_order', [DataRequired()])
 
-class Add_Section_Form(Form):
-    store_id = IntegerField('store_id', [DataRequired()])
-    section_name = StringField('section_name', [DataRequired()])
 
 class Add_Menu_Form(Form):
-    store_id = IntegerField('store_id', [DataRequired()])
-    section_id = IntegerField('section_id', [DataRequired()])
+    store_id = StringField('store_id', [DataRequired()])
+    section_name = StringField('section_name', [DataRequired()])
     menu_name = StringField('menu_name', [DataRequired()])
-    price = IntegerField('price', [DataRequired()])
+    menu_price = IntegerField('menu_price', [DataRequired()])
 
 class Add_Group_Form(Form):
-    menu_id = IntegerField('menu_id', [DataRequired()])
-    group_name = StringField('area_name', [DataRequired()])
+    store_id = StringField('store_id', [DataRequired()])
+    section_name = StringField('section_name', [DataRequired()])
+    menu_name = StringField('menu_name', [DataRequired()])
+    group_name = StringField('group_name', [DataRequired()])
     min_orderable_quantity = IntegerField('min_orderable_quantity', [DataRequired()])
     max_orderable_quantity = IntegerField('max_orderable_quantity', [DataRequired()])
 class Add_Option_Form(Form):
-    store_id = IntegerField('store_id', [DataRequired()])
-    area_id = IntegerField('area_id', [DataRequired()])
+    store_id = StringField('store_id', [DataRequired()])
+    section_name = StringField('section_name', [DataRequired()])
+    menu_name = StringField('menu_name', [DataRequired()])
+    group_name = StringField('group_name', [DataRequired()])
     option_name = StringField('option_name', [DataRequired()])
-    price = IntegerField('price', [DataRequired()])
-
-class Add_Option_Group_Mapping_Form(Form):
-    group_id = IntegerField('group_id', [DataRequired()])
-    option_id = IntegerField('option_id', [DataRequired()])
+    option_price = IntegerField('option_price', [DataRequired()])
