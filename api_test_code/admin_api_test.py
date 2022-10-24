@@ -41,13 +41,13 @@ option={
     'section_name': '단품메뉴',
     'menu_name': '싸이버거단품',
     'group_name': '피클',
-    'option_name': '기본',
-    'option_price': 0   
+    'option_name': '빼기',
+    'option_price': 50000000   
 }
 
 
 #requests.post(aws_add_store, json=store)
-requests.post(aws_add_menu,json=menu)
-requests.post(aws_add_group,json=group)
+#requests.post(aws_add_menu,json=menu)
+#requests.post(aws_add_group,json=group)
 requests.post(aws_add_option,json=option)
 
