@@ -151,7 +151,7 @@ def delivery_posting():
     _id = mongo_db.delivery_post.insert_one(data)
     post_id = str(_id.inserted_id)
 
-    return jsonify(post_id=post_id)
+    return jsonify(post_id=post_id, success=True)
 
 #206
 @bp.route('/post/update', methods=['GET', 'PATCH'])
@@ -177,6 +177,7 @@ def delivery_post_update():
             'max_member': True
         }
         post = db.delivery_post.find_one(find, projection)
+        post['success'] = True
 
         return make_response(json.dumps(post, ensure_ascii=False))
 
@@ -292,7 +293,7 @@ def delivery_post_condition_switch():
     }
     db.delivery_post.update_one(find, update)
 
-    return jsonify(post_id=post_id)
+    return jsonify(post_id=post_id, success=True, condition= not post['is_closed'])
 
 #주문하기 관련
 
@@ -324,7 +325,7 @@ def delivery_ordering():
     }
     db.delivery_post.update_one(find, update)
 
-    return jsonify(post_id=post_id)
+    return jsonify(post_id=post_id, success=True)
 
 #210
 @bp.route('/ordering/update', methods=['GET', 'PATCH'])
@@ -369,7 +370,7 @@ def delivery_ordering_update():
 
     db.delivery_post.update_one(find, update)
 
-    return ('', 204)
+    return jsonify(post_id=post_id, success=True)
 def pricing(order, db):
     store_id = order['store_id']
     orders = order['orders']
