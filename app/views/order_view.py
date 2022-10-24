@@ -146,7 +146,7 @@ def delivery_posting():
         'orders': []
     }
 
-    _id = mongo_db.delivecry_post.insert_one(data)
+    _id = mongo_db.delivery_post.insert_one(data)
     post_id = str(_id.inserted_id)
 
     return jsonify(post_id=post_id)
