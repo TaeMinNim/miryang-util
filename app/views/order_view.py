@@ -32,6 +32,7 @@ def delivery_store_list():
         store_json={
             'store_id': str(store['_id']),
             'store_name': store['store_name'],
+            'min_order': store['min_order'],
             'fee': store['fee']
         }
         json_list.append(store_json)
@@ -197,13 +198,14 @@ def delivery_post_update():
     }
     db.delivery_post.update_one(find, update)
     return jsonify(post_id=post_id)
+
+#211
 @bp.route('/post/join/condition-switch')
 def delivery_post_join():
     if not g.user_id:
         return ('access denied', 500)
     client = MongoClient(host='localhost', port=27017)
     db = client['delivery']
-
 
     post_id = request.args['post_id']
     find = {
@@ -302,17 +304,6 @@ def delivery_ordering():
     client = MongoClient(host='localhost', port=27017)
     db = client['delivery']
 
-    mysql_db = db_connection()
-    cursor = mysql_db.cursor()
-
-    sql = """
-        SELECT joined_delivery FROM user WHERE id = {user_id}
-        """.format(user_id=g.user_id)
-    select_result = cursor.execute(sql)
-
-    if select_result:
-        return ('참여한 그룹이 존재합니다', 500)
-
     order_json = request.get_json()
     post_id = order_json['post_id']
 
@@ -331,13 +322,6 @@ def delivery_ordering():
         '$push': { 'orders': user_order }
     }
     db.delivery_post.update_one(find, update)
-
-    sql = """
-        UPDATE service_user
-        SET joined_delivery = {post_id}
-        WHERE id = {user_id}
-        """.format(post_id=post_id, user_id=g.user_id)
-    cursor.execute(sql)
 
     return jsonify(post_id=post_id)
 

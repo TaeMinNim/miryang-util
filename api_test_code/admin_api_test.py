@@ -21,14 +21,14 @@ store={
 }
 
 menu={
-    'store_id': '6345a45f1c32cd7c4b64d895',
+    'store_id': '6356bba3050d1ddf23347703',
     'section_name': '단품메뉴',
     'menu_name': '싸이버거단품',
     'menu_price': 50000
 }
 
 group={
-    'store_id': '6345a45f1c32cd7c4b64d895',
+    'store_id': '6356bba3050d1ddf23347703',
     'section_name': '단품메뉴',
     'menu_name': '싸이버거단품',
     'group_name': '피클',
@@ -37,7 +37,7 @@ group={
 }
 
 option={
-    'store_id': '6345a45f1c32cd7c4b64d895',
+    'store_id': '6356bba3050d1ddf23347703',
     'section_name': '단품메뉴',
     'menu_name': '싸이버거단품',
     'group_name': '피클',

@@ -89,7 +89,6 @@ def login():
         print(json)
         form = Login_Form.from_json(json)
 
-
         sql = "SELECT id, nick_name, pw FROM SERVICE_USER WHERE user_name = '{user_name}'".format(user_name=form.user_name.data)
         if cursor.execute(sql):
             data = cursor.fetchall()[0]
@@ -107,7 +106,7 @@ def login():
                 }
                 token = jwt.encode(data, SECRET_KEY)
 
-                response = make_response({'result' : 'true'})
+                response = make_response({'result' : 'true', 'user_id': id, 'nick_name': nick_name})
                 response.headers['Content-Type'] = 'Application/json'
                 response.headers['Authentication'] = '{token}'.format(token=token)
             else:
