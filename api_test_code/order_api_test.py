@@ -63,7 +63,7 @@ post_condition = {
 
 order ={
     'store_id': '6356cee8b760499670114a7f',
-    'post_id': '6356dadab99e3415a2513f54',
+    'post_id': '6356e3724c18725d346fc34f',
     'orders': [
         {
             #불싸이버거 - 음료변경(제로콜라, 환타, 사이다) - 피클(기본)

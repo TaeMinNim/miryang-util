@@ -373,7 +373,7 @@ def delivery_ordering_update():
     return jsonify(post_id=post_id, success=True)
 def pricing(order, db):
     store_id = order['store_id']
-    orders = order['user_orders']
+    orders = order['orders']
 
     menus = []
     groups = []
