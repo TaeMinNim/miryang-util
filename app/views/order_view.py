@@ -469,7 +469,7 @@ def pricing(order, db):
     sum_price = 0
     for order in orders:
         menu_index, order['menu_price'] = find_menu_price(order['menu_name'])
-        order['sum_price'] += sum_price + order['menu_price']
+        sum_price += order['menu_price']
 
         for group in order['groups']:
             group_index, group['group_name'] = find_group_index(menu_index, group['group_id'])
@@ -483,5 +483,5 @@ def pricing(order, db):
                 sum_price += option_price
                 del group['options'][index]
                 group['options'].insert(index, option_set)
-
+        order['sum_price'] = sum_price
     return orders
