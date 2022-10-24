@@ -146,6 +146,8 @@ def delivery_posting():
         'orders': []
     }
 
+    print(data)
+
     _id = mongo_db.delivery_post.insert_one(data)
     post_id = str(_id.inserted_id)
 
