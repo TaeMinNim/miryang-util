@@ -466,8 +466,11 @@ def pricing(order, db):
             if menu['menu_name'] == menu_name:
                 return menu_index, menu['menu_price']
 
+    sum_price = 0
     for order in orders:
         menu_index, order['menu_price'] = find_menu_price(order['menu_name'])
+        order['sum_price'] = sum_price + order['menu_price']
+
         for group in order['groups']:
             group_index, group['group_name'] = find_group_index(menu_index, group['group_id'])
             for index, option in enumerate(group['options']):
@@ -477,6 +480,8 @@ def pricing(order, db):
                     'option_name': option_name,
                     'option_price': option_price
                 }
+                sum_price += option_price
                 del group['options'][index]
                 group['options'].insert(index, option_set)
+
     return orders
