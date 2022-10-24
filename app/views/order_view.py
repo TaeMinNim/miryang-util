@@ -143,7 +143,7 @@ def delivery_posting():
         'update_date': today.strftime('%Y-%m-%dT%H:%M:%S'),
         'views': 0,
         'is_closed': False,
-        'orders': []
+        'user_orders': []
     }
 
     print(data)
@@ -243,7 +243,7 @@ def delivery_post_list():
 
     projection = {
         'content': False,
-        'orders': False
+        'user_orders': False
     }
     post_list = list(db.delivery_post.find({}, projection))
     for post in post_list:
@@ -321,7 +321,7 @@ def delivery_ordering():
     }
 
     update = {
-        '$push': { 'orders': user_order }
+        '$push': { 'user_orders': user_order }
     }
     db.delivery_post.update_one(find, update)
 
@@ -342,12 +342,12 @@ def delivery_ordering_update():
             '_id': ObjectId(post_id)
         }
         projection = {
-            'orders': {
+            'user_orders': {
                 '$elemMatch': {'user_id': g.user_id}
             }
         }
         data = db.delivery_post.find_one(find, projection)
-        orders = data['orders'][0]
+        orders = data['user_orders'][0]
         return make_response(json.dumps(orders, ensure_ascii=False))
 
     update_json = request.get_json()
@@ -357,7 +357,7 @@ def delivery_ordering_update():
 
     find = {
         '_id': ObjectId(post_id),
-        'orders': {
+        'user_orders': {
             '$elemMatch': {
                 'user_id': g.user_id
             }
@@ -365,7 +365,7 @@ def delivery_ordering_update():
     }
 
     update = {
-        '$set': { 'orders.$.orders': orders }
+        '$set': { 'user_orders.$.orders': orders }
     }
 
     db.delivery_post.update_one(find, update)
@@ -373,7 +373,7 @@ def delivery_ordering_update():
     return jsonify(post_id=post_id, success=True)
 def pricing(order, db):
     store_id = order['store_id']
-    orders = order['orders']
+    orders = order['user_orders']
 
     menus = []
     groups = []

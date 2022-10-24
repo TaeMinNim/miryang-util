@@ -62,8 +62,8 @@ post_condition = {
 }
 
 order ={
-    'store_id': '6356bba3050d1ddf23347703',
-    'post_id': '6356bd1958c02a64dcf06382',
+    'store_id': '6356cee8b760499670114a7f',
+    'post_id': '6356dadab99e3415a2513f54',
     'orders': [
         {
             #불싸이버거 - 음료변경(제로콜라, 환타, 사이다) - 피클(기본)
@@ -71,8 +71,8 @@ order ={
             'menu_name': '싸이버거단품',
             'groups': [
                 {
-                    'group_id': 1666628558151,
-                    'options': [1666628560234]
+                    'group_id': 1666633476187,
+                    'options': [1666633476210]
                 }
             ]
         }
@@ -123,7 +123,7 @@ update_order ={
 #res = requests.patch('http://localhost:5000/order/post/condition-switch', headers=loginheader, json=post_condition)
 
 #209
-#res = requests.post('http://localhost:5000/order/ordering', headers=loginheader, json=order)
+res = requests.post('http://52.78.106.235:5000/order/ordering', headers=loginheader, json=order)
 
 #210
 #GET
@@ -137,7 +137,7 @@ update_order ={
 #res = requests.get(local_select_option, headers=loginheader)
 
 #res = requests.get('http://localhost:5000/order/post/join/condition-switch?post_id=634e8af7b829facb9e6239e8', headers=loginheader)
-res = requests.get('http://52.78.106.235:5000/order/post/list', headers=loginheader)
+#res = requests.get('http://52.78.106.235:5000/order/post/list', headers=loginheader)
 
 #res = requests.get('http://52.78.106.235:5000/order/menu/detail?store_id=6345a45f1c32cd7c4b64d895&menu_name=딥치즈버거', headers=loginheader)
 
