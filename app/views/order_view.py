@@ -313,6 +313,7 @@ def delivery_ordering():
 
     user_order = {
         'user_id': g.user_id,
+        'nick_name': g.nick_name,
         'orders': orders
     }
 
