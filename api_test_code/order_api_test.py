@@ -102,13 +102,13 @@ update_order ={
 #res = requests.get('http://52.78.106.235:5000/order/store/list', headers=loginheader)
 
 #202
-#res = requests.get('http://localhost:5000/order/menu/list?store_id=6356bba3050d1ddf23347703', headers=loginheader)
+res = requests.get('http://localhost:5000/order/menu/list?store_id=6356cee8b760499670114a7f', headers=loginheader)
 
 #203
 #res = requests.get('http://localhost:5000/order/menu/detail?store_id=6356bba3050d1ddf23347703&menu_name=싸이버거단품', headers=loginheader)
 
 #204
-res = requests.post('http://52.78.106.235:5000/order/post/posting', headers=loginheader, json=posting)
+#res = requests.post('http://52.78.106.235:5000/order/post/posting', headers=loginheader, json=posting)
 
 #205
 #res = requests.get('http://localhost:5000/order/post/detail/6356bd1958c02a64dcf06382', headers=loginheader)

@@ -54,11 +54,10 @@ def delivery_menu_list():
         '_id': ObjectId(store_id)
     }
     project={
-        'menus': {
-            'section_name': True,
-            'menu_name': True,
-            'menu_price': True
-        }
+        '_id': False,
+        'menus.section_name': True,
+        'menus.menu_name': True,
+        'menus.menu_price': True
     }
     menu_list = db.delivery_store.find_one(find, project)['menus']
     json_list = []
