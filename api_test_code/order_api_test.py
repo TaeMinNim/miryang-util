@@ -39,10 +39,10 @@ signupdata = {
 }
 
 posting = {
-    'store_id': '6356bba3050d1ddf23347703',
-    'title':'맘스터치 시키실분자운동',
+    'store_id': '6356cee8b760499670114a7f',
+    'title':'이거 조회하세요',
     'content': '같이 시켜요~',
-    'order_time': '2022-10-05 10:50',
+    'order_time': '2022-10-05T10:50',
     'place': '기숙사',
     'min_member' : 3,
     'max_member' : 5
@@ -52,7 +52,7 @@ update_posting = {
     'post_id': '6345aa7b911ed10ac4cde368',
     'title':'맘스터치 시키실분자운동',
     'content': '같이 시켜요~',
-    'order_time': '2022-10-05 10:50',
+    'order_time': '2022-10-05T10:50',
     'place': '기숙사',
     'min_member' : 3,
     'max_member' : 5
@@ -99,7 +99,7 @@ update_order ={
 #res = requests.post('http://52.78.106.235:5000/auth/login', json=logindata)
 
 #201
-res = requests.get('http://172.30.1.2:5000/order/store/list', headers=loginheader)
+#res = requests.get('http://52.78.106.235:5000/order/store/list', headers=loginheader)
 
 #202
 #res = requests.get('http://localhost:5000/order/menu/list?store_id=6356bba3050d1ddf23347703', headers=loginheader)
@@ -108,7 +108,7 @@ res = requests.get('http://172.30.1.2:5000/order/store/list', headers=loginheade
 #res = requests.get('http://localhost:5000/order/menu/detail?store_id=6356bba3050d1ddf23347703&menu_name=싸이버거단품', headers=loginheader)
 
 #204
-#res = requests.post('http://localhost:5000/order/post/posting', headers=loginheader, json=posting)
+res = requests.post('http://52.78.106.235:5000/order/post/posting', headers=loginheader, json=posting)
 
 #205
 #res = requests.get('http://localhost:5000/order/post/detail/6356bd1958c02a64dcf06382', headers=loginheader)
@@ -137,7 +137,7 @@ res = requests.get('http://172.30.1.2:5000/order/store/list', headers=loginheade
 #res = requests.get(local_select_option, headers=loginheader)
 
 #res = requests.get('http://localhost:5000/order/post/join/condition-switch?post_id=634e8af7b829facb9e6239e8', headers=loginheader)
-#res = requests.get('http://localhost:5000/order/post/list', headers=loginheader)
+#res = requests.get('http://52.78.106.235:5000/order/post/list', headers=loginheader)
 
 #res = requests.get('http://52.78.106.235:5000/order/menu/detail?store_id=6345a45f1c32cd7c4b64d895&menu_name=딥치즈버거', headers=loginheader)
 

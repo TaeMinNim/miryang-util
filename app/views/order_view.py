@@ -141,13 +141,13 @@ def delivery_posting():
         'order_time': form.order_time.data,
         'min_member': form.min_member.data,
         'max_member': form.max_member.data,
-        'update_date': today.strftime('%Y/%m/%d %H:%M:%S'),
+        'update_date': today.strftime('%Y-%m-%dT%H:%M:%S'),
         'views': 0,
         'is_closed': False,
         'orders': []
     }
 
-    _id = mongo_db.delivery_post.insert_one(data)
+    _id = mongo_db.delivecry_post.insert_one(data)
     post_id = str(_id.inserted_id)
 
     return jsonify(post_id=post_id)

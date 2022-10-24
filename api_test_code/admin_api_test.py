@@ -21,14 +21,14 @@ store={
 }
 
 menu={
-    'store_id': '6356bba3050d1ddf23347703',
+    'store_id': '6356cee8b760499670114a7f',
     'section_name': '단품메뉴',
     'menu_name': '싸이버거단품',
     'menu_price': 50000
 }
 
 group={
-    'store_id': '6356bba3050d1ddf23347703',
+    'store_id': '6356cee8b760499670114a7f',
     'section_name': '단품메뉴',
     'menu_name': '싸이버거단품',
     'group_name': '피클',
@@ -37,7 +37,7 @@ group={
 }
 
 option={
-    'store_id': '6356bba3050d1ddf23347703',
+    'store_id': '6356cee8b760499670114a7f',
     'section_name': '단품메뉴',
     'menu_name': '싸이버거단품',
     'group_name': '피클',
@@ -46,8 +46,8 @@ option={
 }
 
 
-#requests.post(local_add_store, json=store)
-requests.post(local_add_menu,json=menu)
-requests.post(local_add_group,json=group)
-requests.post(local_add_option,json=option)
+#requests.post(aws_add_store, json=store)
+requests.post(aws_add_menu,json=menu)
+requests.post(aws_add_group,json=group)
+requests.post(aws_add_option,json=option)
 
