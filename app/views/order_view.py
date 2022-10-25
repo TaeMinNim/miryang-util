@@ -220,16 +220,15 @@ def delivery_post_join():
     if g.user_id in post['join_user']:
         update = {
             '$pull': {
-                'join_user': g.user_id
+                'join_user': g.user_id,
+                'user_orders': {'user_id': g.user_id}
             }
+
         }
     else:
         update = {
             '$push': {
                 'join_user': g.user_id
-            },
-            '$pull': {
-                'user_orders.user_id': g.user_id
             }
 
         }
