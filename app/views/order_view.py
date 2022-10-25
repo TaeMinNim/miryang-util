@@ -106,8 +106,7 @@ def delivery_menu_detail():
             '$elemMatch': {'menu_name': menu_name}
         }
     }
-    print(db.delivery_store.find_one(find, project))
-    menu_detail = db.delivery_store.find_one(find, project)['menus'][0]
+    menu_detail = db.delivery_store.find_one(find, project)['menus'][0]['groups']
     return make_response(json.dumps(menu_detail, ensure_ascii=False))
 
 #포스팅 관련

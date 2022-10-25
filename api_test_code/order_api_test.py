@@ -63,7 +63,7 @@ post_condition = {
 
 order ={
     'store_id': '6356cee8b760499670114a7f',
-    'post_id': '6356ea7a9762dd592396906f',
+    'post_id': '63576f0561c32ac32836f9b7',
     'orders': [
         {
             #불싸이버거 - 음료변경(제로콜라, 환타, 사이다) - 피클(기본)
@@ -105,7 +105,7 @@ update_order ={
 #res = requests.get('http://52.78.106.235:5000/order/menu/list?store_id=6356cee8b760499670114a7f', headers=loginheader)
 
 #203
-#res = requests.get('http://localhost:5000/order/menu/detail?store_id=6356bba3050d1ddf23347703&menu_name=싸이버거단품', headers=loginheader)
+res = requests.get('http://52.78.106.235:5000/order/menu/detail?store_id=6356cee8b760499670114a7f&menu_name=싸이버거단품', headers=loginheader)
 
 #204
 #res = requests.post('http://52.78.106.235:5000/order/post/posting', headers=loginheader, json=posting)
@@ -123,11 +123,11 @@ update_order ={
 #res = requests.patch('http://localhost:5000/order/post/condition-switch', headers=loginheader, json=post_condition)
 
 #209
-res = requests.post('http://52.78.106.235:5000/order/ordering', headers=loginheader, json=order)
+#res = requests.post('http://52.78.106.235:5000/order/ordering', headers=loginheader, json=order)
 
 #210
 #GET
-#res = requests.get('http://localhost:5000/order/ordering/update?post_id=6356bd1958c02a64dcf06382', headers=loginheader)
+#res = requests.get('http://52.78.106.235:5000/order/ordering/update?post_id=63576f0561c32ac32836f9b7', headers=loginheader)
 #PATCH
 #res = requests.patch('http://localhost:5000/order/ordering/update', headers=loginheader, json=update_order)
 
