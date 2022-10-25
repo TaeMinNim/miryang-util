@@ -227,7 +227,11 @@ def delivery_post_join():
         update = {
             '$push': {
                 'join_user': g.user_id
+            },
+            '$pull': {
+                'user_orders.user_id': g.user_id
             }
+
         }
     db.delivery_post.update_one(find, update)
     return ('', 204)
