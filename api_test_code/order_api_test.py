@@ -99,7 +99,7 @@ update_order ={
 #res = requests.post('http://52.78.106.235:5000/auth/login', json=logindata)
 
 #201
-#res = requests.get('http://52.78.106.235:5000/order/store/list', headers=loginheader)
+res = requests.get('http://52.78.106.235:5000/order/store/list', headers=loginheader)
 
 #202
 #res = requests.get('http://52.78.106.235:5000/order/menu/list?store_id=6356cee8b760499670114a7f', headers=loginheader)

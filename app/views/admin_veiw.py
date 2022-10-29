@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from app.forms import Add_Store_Form, Add_Menu_Form,Add_Group_Form,Add_Option_Form
-from app import db_connection
+from app import db_connection, mongodb_connection
 import wtforms_json
 from datetime import datetime
 
@@ -113,3 +113,18 @@ def add_option():
 
     db.delivery_store.update_many(filter=find, update=update, array_filters=identifier)
     return ('', 204)
+
+@bp.route('/taxi/platform', methods=['POST'])
+def taxi_platform():
+    client = mongodb_connection()
+    db = client['taxi']
+
+    json = request.get_json()
+    print(json)
+
+    data = {
+        'platform_name': json['platform_name']
+    }
+
+    _id = db.taxi_platform.insert_one(data)
+    return (str(_id.inserted_id), 200)
