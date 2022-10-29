@@ -82,7 +82,7 @@ def taxi_post_detail(post_id):
     return make_response(json.dumps(post, ensure_ascii=False))
 
 @bp.route('/post/condition-switch', methods=['PATCH'])
-def delivery_post_condition_switch():
+def taxi_post_condition_switch():
     json = request.get_json()
     post_id = json['post_id']
 
@@ -100,3 +100,39 @@ def delivery_post_condition_switch():
     db.taxi_post.update_one(find, update)
 
     return jsonify(post_id=post_id, success=True, condition= not post['is_closed'])
+
+@bp.route('/post/join/condition-switch', methods=['PATCH'])
+def taxi_post_join():
+    if not g.user_id:
+        return ('access denied', 500)
+    client = mongodb_connection()
+    db = client['taxi']
+    json = request.get_json()
+    post_id = json['post_id']
+    find = {
+        '_id': ObjectId(post_id)
+    }
+    post = db.taxi_post.find_one(find)
+
+    if g.user_id == post['user_id']:
+        return ('대표자는 그룹을 탈퇴할 수 없습니다', 500)
+
+    if g.user_id in post['join_user']:
+        joined = False
+        update = {
+            '$pull': {
+                'join_user': g.user_id,
+            }
+
+        }
+    else:
+        joined=True
+        update = {
+            '$push': {
+                'join_user': g.user_id
+            }
+
+        }
+    db.taxi_post.update_one(find, update)
+
+    return jsonify(post_id=post_id, success=True, join=joined)
