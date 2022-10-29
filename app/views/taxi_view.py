@@ -60,4 +60,23 @@ def delivery_posting():
 
     return jsonify(post_id=post_id, success=True)
 
+@bp.route('/post/detail/<string:post_id>')
+def taxi_post_detail(post_id):
+    if not g.user_id:
+        return ('access denied', 500)
 
+    client = mongodb_connection()
+    db = client['taxi']
+
+    find = {
+        '_id': ObjectId(post_id)
+    }
+    update = {
+        '$inc': { 'views': 1 }
+    }
+
+    post = db.taxi_post.find_one_and_update(find, update, return_document=ReturnDocument.AFTER)
+    print(post)
+    post['_id'] = str(post['_id'])
+
+    return make_response(json.dumps(post, ensure_ascii=False))
