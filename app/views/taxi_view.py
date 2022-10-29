@@ -136,3 +136,18 @@ def taxi_post_join():
     db.taxi_post.update_one(find, update)
 
     return jsonify(post_id=post_id, success=True, join=joined)
+
+@bp.route('/post/list')
+def taxi_post_list():
+    if not g.user_id:
+        return ('access denied', 500)
+    client = mongodb_connection()
+    db = client['taxi']
+
+    projection = {
+        'content': False,
+    }
+    post_list = list(db.taxi_post.find({}, projection))
+    for post in post_list:
+        post['_id'] = str(post['_id'])
+    return make_response(json.dumps(post_list, ensure_ascii=False))
