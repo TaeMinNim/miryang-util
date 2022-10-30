@@ -39,7 +39,7 @@ def delivery_posting():
     today = datetime.now()
     data = {
         'user_id': g.user_id,
-        'join_user': [g.user_id],
+        'join_users': [g.user_id],
         'nick_name': g.nick_name,
         'title': json['title'],
         'content': json['content'],

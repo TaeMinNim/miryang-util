@@ -6,7 +6,7 @@ import json
 from bson import ObjectId
 from pymongo import MongoClient, ReturnDocument
 
-from app import db_connection
+from app import db_connection, mongodb_connection
 
 bp = Blueprint('order',__name__, url_prefix='/order')
 wtforms_json.init()
@@ -19,7 +19,7 @@ def delivery_store_list():
     if not g.user_id:
         return ('access denied', 500)
 
-    client = MongoClient(host='localhost', port=27017)
+    client = mongodb_connection()
     db = client['delivery']
 
     projection={
@@ -45,7 +45,7 @@ def delivery_menu_list():
     if not g.user_id:
         return ('access denied', 500)
 
-    client = MongoClient(host='localhost', port=27017)
+    client = mongodb_connection()
     db = client['delivery']
 
     store_id = request.args['store_id']
@@ -92,7 +92,7 @@ def delivery_menu_list():
 def delivery_menu_detail():
     if not g.user_id:
         return ('access denied', 500)
-    client = MongoClient(host='localhost', port=27017)
+    client = mongodb_connection()
     db = client['delivery']
 
     store_id= request.args['store_id']
@@ -117,7 +117,7 @@ def delivery_posting():
     if not g.user_id:
         return ('access denied', 500)
 
-    client = MongoClient(host='localhost', port=27017)
+    client = mongodb_connection()
     mongo_db = client['delivery']
 
     json = request.get_json()
@@ -130,7 +130,7 @@ def delivery_posting():
     today = datetime.now()
     data = {
         'user_id': g.user_id,
-        'join_user': [g.user_id],
+        'join_users': [g.user_id],
         'nick_name': g.nick_name,
         'store': store,
         'title': form.title.data,
@@ -158,7 +158,7 @@ def delivery_post_update():
     if not g.user_id:
         return ('access denied', 500)
 
-    client = MongoClient(host='localhost', port=27017)
+    client = mongodb_connection()
     db = client['delivery']
     if request.method == 'GET':
         post_id = request.args['post_id']
@@ -205,7 +205,7 @@ def delivery_post_update():
 def delivery_post_join():
     if not g.user_id:
         return ('access denied', 500)
-    client = MongoClient(host='localhost', port=27017)
+    client = mongodb_connection()
     db = client['delivery']
 
     post_id = request.args['post_id']
@@ -220,7 +220,7 @@ def delivery_post_join():
     if g.user_id in post['join_user']:
         update = {
             '$pull': {
-                'join_user': g.user_id,
+                'join_users': g.user_id,
                 'user_orders': {'user_id': g.user_id}
             }
 
@@ -228,7 +228,7 @@ def delivery_post_join():
     else:
         update = {
             '$push': {
-                'join_user': g.user_id
+                'join_users': g.user_id
             }
 
         }
@@ -240,7 +240,7 @@ def delivery_post_join():
 def delivery_post_list():
     if not g.user_id:
         return ('access denied', 500)
-    client = MongoClient(host='localhost', port=27017)
+    client = mongodb_connection()
     db = client['delivery']
 
     projection = {
@@ -259,7 +259,7 @@ def delivery_post_detail(post_id):
     if not g.user_id:
         return ('access denied', 500)
 
-    client = MongoClient(host='localhost', port=27017)
+    client = mongodb_connection()
     db = client['delivery']
 
     find = {
@@ -282,7 +282,7 @@ def delivery_post_condition_switch():
     json = request.get_json()
     post_id = json['post_id']
 
-    client = MongoClient(host='localhost', port=27017)
+    client = mongodb_connection()
     db = client['delivery']
 
     find = {
@@ -305,7 +305,7 @@ def delivery_ordering():
     if not g.user_id:
         return ('access denied', 500)
 
-    client = MongoClient(host='localhost', port=27017)
+    client = mongodb_connection()
     db = client['delivery']
 
     order_json = request.get_json()
@@ -336,7 +336,7 @@ def delivery_ordering_update():
     if not g.user_id:
         return ('access denied', 500)
 
-    client = MongoClient(host='localhost', port=27017)
+    client = mongodb_connection()
     db = client['delivery']
 
     if request.method == 'GET':
