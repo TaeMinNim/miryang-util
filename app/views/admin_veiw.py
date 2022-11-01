@@ -19,14 +19,14 @@ def add_delivery_store():
     form = Add_Store_Form.from_json(json)
 
     data = {
-        'store_name' : form.store_name.data,
-        'fee' : form.fee.data,
-        'min_order' : form.min_order.data,
-        'menus' : []
+        'store_name': form.store_name.data,
+        'fee': form.fee.data,
+        'min_order': form.min_order.data,
+        'menus': []
     }
 
     _id = db.delivery_store.insert_one(data)
-    return jsonify(store_id=_id.inserted_id)
+    return jsonify(store_id=str(id.inserted_id))
 
 @bp.route('/delivery/add/menu', methods=['POST'])
 def add_delivery_menu():
