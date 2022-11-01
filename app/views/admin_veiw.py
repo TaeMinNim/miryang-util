@@ -26,7 +26,7 @@ def add_delivery_store():
     }
 
     _id = db.delivery_store.insert_one(data)
-    return jsonify(store_id=str(id.inserted_id))
+    return jsonify(store_id=str(_id.inserted_id))
 
 @bp.route('/delivery/add/menu', methods=['POST'])
 def add_delivery_menu():
@@ -60,10 +60,13 @@ def add_delivery_group():
     store_id = insert_json_data['store_id']
 
     group_list = []
+    group_ids = []
     for group in insert_json_data['groups']:
-        group['group_id'] =  int(round(datetime.today().timestamp() * 1000))
-        group_list.append(group)
+        id = int(round(datetime.today().timestamp() * 1000))
+        group_ids.append(id)
 
+        group['group_id'] = id
+        group_list.append(group)
 
     find = {'_id': ObjectId(store_id)}
 
@@ -76,7 +79,7 @@ def add_delivery_group():
     ]
     db.delivery_store.update_many(filter=find, update=update, array_filters=identifier)
 
-    return jsonify(group_id=id, menu_name=insert_json_data['menu_name'])
+    return jsonify(group_ids=group_ids, menu_name=insert_json_data['menu_name'])
 
 @bp.route('/delivery/add/option', methods=['POST'])
 def add_delivery_option():
@@ -87,9 +90,13 @@ def add_delivery_option():
     store_id = insert_json_data['store_id']
 
     option_list = []
-    for group in insert_json_data['groups']:
-        group['group_id'] = int(round(datetime.today().timestamp() * 1000))
-        option_list.append(group)
+    option_ids = []
+    for option in insert_json_data['options']:
+        id = int(round(datetime.today().timestamp() * 1000))
+        option_ids.append(id)
+
+        option['option_id'] = id
+        option_list.append(option)
 
     find = {'_id': ObjectId(store_id)}
 
@@ -103,7 +110,7 @@ def add_delivery_option():
     ]
 
     db.delivery_store.update_many(filter=find, update=update, array_filters=identifier)
-    return jsonify(option_id=id)
+    return jsonify(option_ids=option_ids)
 
 @bp.route('/taxi/platform', methods=['POST'])
 def taxi_platform():
