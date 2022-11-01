@@ -1,3 +1,4 @@
+import pymysql.err
 from flask import Blueprint, request, jsonify, make_response, g
 from app.forms import Signup_Form,Login_Form
 from datetime import datetime
@@ -10,8 +11,9 @@ import wtforms_json
 wtforms_json.init()
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-@bp.route('/overlap/username')
-def usernameOverlapCheck():
+#100
+@bp.route('/check/overlap/username')
+def check_username_overlap():
     user_name = request.args['user_name']
     db = db_connection()
     cursor = db.cursor()
@@ -19,12 +21,15 @@ def usernameOverlapCheck():
     user = cursor.execute(sql)
     db.close()
     if user == 0:
-        return jsonify(response=False)
+        isOverlapped = False
     else:
-        return jsonify(response=True)
+        isOverlapped = True
 
-@bp.route('/overlap/studentnum')
-def studentnumOverlapCheck():
+    return jsonify(isOverlapped=isOverlapped)
+
+#101
+@bp.route('/check/overlap/studentnum')
+def check_overlap_studentnum():
     student_num = request.args['student_num']
     db = db_connection()
     cursor = db.cursor()
@@ -32,12 +37,15 @@ def studentnumOverlapCheck():
     user = cursor.execute(sql)
     db.close()
     if user == 0:
-        return jsonify(response=False)
+        isOverlapped = False
     else:
-        return jsonify(response=True)
+        isOverlapped = True
 
-@bp.route('/overlap/nickname')
-def nicknameOverlapCheck():
+    return jsonify(isOverlapped=isOverlapped)
+
+#102
+@bp.route('/check/overlap/nickname')
+def check_overlap_nickname():
     nick_name = request.args['nick_name']
     db = db_connection()
     cursor = db.cursor()
@@ -45,15 +53,17 @@ def nicknameOverlapCheck():
     user = cursor.execute(sql)
     db.close()
     if user == 0:
-        return jsonify(response=False)
+        isOverlapped = False
     else:
-        return jsonify(response=True)
+        isOverlapped = True
 
+    return jsonify(isOverlapped=isOverlapped)
+
+#103
 @bp.route('/signup', methods=['POST'])
 def signup():
     json = request.get_json()
     form = Signup_Form.from_json(json)
-    print(json)
     if request.method == 'POST':
         db = db_connection()
         cursor = db.cursor()
@@ -67,64 +77,65 @@ def signup():
 
         try:
             cursor.execute(sql)
-        except Exception as e:
-            print('fail')
+        except pymysql.err.IntegrityError as e:
             print(e)
-            result = jsonify(result='false')
+            success = False
+        except Exception as e:
+            print(e)
+            success = False
         else:
-            print('success')
             db.commit()
-            result = jsonify(result='true')
+            success = True
         finally:
             db.close()
-            return result
+            return jsonify(success=success)
 
-
+#104
 @bp.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
         db = db_connection()
         cursor = db.cursor()
         json = request.get_json()
-        print(json)
         form = Login_Form.from_json(json)
 
         sql = "SELECT id, nick_name, pw FROM SERVICE_USER WHERE user_name = '{user_name}'".format(user_name=form.user_name.data)
         if cursor.execute(sql):
             data = cursor.fetchall()[0]
-
-            id = data[0]
-            nick_name = data[1]
-            hashed_pw = data[2]
+            id, nick_name, hashed_pw = data
             request_pw = form.pw.data.encode('utf-8')
-            compare_pw = bcrypt.checkpw(request_pw, hashed_pw.encode('utf-8'))
 
-            if compare_pw:
+            decode_result = bcrypt.checkpw(request_pw, hashed_pw.encode('utf-8'))
+
+            if decode_result:
                 data = {
                     'id' : id,
                     'nick_name': nick_name
                 }
                 token = jwt.encode(data, SECRET_KEY)
 
-                response = make_response({'result' : 'true', 'user_id': id, 'nick_name': nick_name})
+                response = make_response({'result' : True, 'user_id': id, 'nick_name': nick_name})
                 response.headers['Content-Type'] = 'Application/json'
                 response.headers['Authentication'] = '{token}'.format(token=token)
             else:
-                response = make_response({'result' : 'fasle'})
+                response = make_response({'result' : False})
         else:
-            response = make_response({'result' : 'fasle'})
+            response = make_response({'result' : False})
+
         return response
 
 @bp.before_app_request
 def analyze_token():
     try:
         token = request.headers['Authorization']
-    except Exception as e:
+    except KeyError as e:
         g.user_id = None
+    except Exception as e:
+        print(e)
     else:
         try:
             decoded_token = jwt.decode(token, SECRET_KEY, algorithms='HS256')
-        except Exception as e:
+        except jwt.exceptions.DecodeError as e:
             return ('Not valid token', 500)
         else:
             g.user_id = decoded_token['id']

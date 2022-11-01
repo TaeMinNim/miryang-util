@@ -4,9 +4,10 @@ from datetime import datetime
 import wtforms_json
 import json
 from bson import ObjectId
-from pymongo import MongoClient, ReturnDocument
+from pymongo import ReturnDocument
 
-from app import db_connection, mongodb_connection
+
+from app import mongodb_connection
 
 bp = Blueprint('order',__name__, url_prefix='/order')
 wtforms_json.init()
@@ -15,19 +16,19 @@ wtforms_json.init()
 
 #201
 @bp.route('/store/list')
-def delivery_store_list():
+def inquire_delivery_store_list():
     if not g.user_id:
         return ('access denied', 500)
 
     client = mongodb_connection()
     db = client['delivery']
 
-    projection={
+    projection = {
         'menu': False
     }
     store_list = db.delivery_store.find({}, projection)
 
-    json_list = []
+    json_store_list = []
     for store in store_list:
         store_json={
             'store_id': str(store['_id']),
@@ -35,13 +36,13 @@ def delivery_store_list():
             'min_order': store['min_order'],
             'fee': store['fee']
         }
-        json_list.append(store_json)
+        json_store_list.append(store_json)
 
-    return make_response(json.dumps(json_list, ensure_ascii=False))
+    return make_response(json.dumps(json_store_list, ensure_ascii=False))
 
 #202
 @bp.route('/menu/list')
-def delivery_menu_list():
+def inquire_delivery_menu_list():
     if not g.user_id:
         return ('access denied', 500)
 
@@ -60,19 +61,18 @@ def delivery_menu_list():
         'menus.menu_price': True
     }
     menu_list = db.delivery_store.find_one(find, project)['menus']
-    json_list = []
+    json_menu_list = []
 
     #Dictionary 형태로 section_name, index를 key:value 형태로 저장
     section_index = {}
     for menu in menu_list:
-        print(menu)
         if menu['section_name'] in section_index:
             index = section_index[menu['section_name']]
             menu_json = {
                 'menu_name': menu['menu_name'],
                 'menu_price': menu['menu_price']
             }
-            json_list[index]['menus'].append(menu_json)
+            json_menu_list[index]['menus'].append(menu_json)
 
         else:
             section_menu_json = {
@@ -82,50 +82,49 @@ def delivery_menu_list():
                     'menu_price': menu['menu_price']
                 }]
             }
-            json_list.append(section_menu_json)
-            section_index[menu['section_name']] = len(json_list) - 1
+            json_menu_list.append(section_menu_json)
+            section_index[menu['section_name']] = len(json_menu_list) - 1
 
-    return make_response(json.dumps(json_list, ensure_ascii=False))
+    return make_response(json.dumps(json_menu_list, ensure_ascii=False))
 
 #203
 @bp.route('/menu/detail')
-def delivery_menu_detail():
+def inquire_delivery_menu_detail():
     if not g.user_id:
         return ('access denied', 500)
     client = mongodb_connection()
     db = client['delivery']
 
-    store_id= request.args['store_id']
+    store_id = request.args['store_id']
     menu_name = request.args['menu_name']
 
-    find={
+    find = {
         '_id': ObjectId(store_id),
     }
-    project={
-        'menus':{
+    projection = {
+        'menus': {
             '$elemMatch': {'menu_name': menu_name}
         }
     }
-    menu_detail = db.delivery_store.find_one(find, project)['menus'][0]['groups']
+    menu_detail = db.delivery_store.find_one(find, projection)['menus'][0]['groups']
     return make_response(json.dumps(menu_detail, ensure_ascii=False))
 
-#포스팅 관련
-
+#게시글 관련
 #204
 @bp.route('/post/posting', methods=['POST'])
-def delivery_posting():
+def post_delivery_posting():
     if not g.user_id:
         return ('access denied', 500)
 
     client = mongodb_connection()
     mongo_db = client['delivery']
 
-    json = request.get_json()
-    form = Posting_Form.from_json(json)
+    post = request.get_json()
+    form = Posting_Form.from_json(post)
 
-    find={'_id': ObjectId(form.store_id.data)}
-    projection={'menus': False}
-    store = mongo_db.delivery_store.find_one(find,projection)
+    find = {'_id': ObjectId(form.store_id.data)}
+    projection = {'menus': False}
+    store = mongo_db.delivery_store.find_one(find, projection)
 
     today = datetime.now()
     data = {
@@ -145,16 +144,50 @@ def delivery_posting():
         'user_orders': []
     }
 
-    print(data)
+    try:
+        _id = mongo_db.delivery_post.insert_one(data)
+    except Exception as e:
+        print(e)
+        success = False
+    else:
+        post_id = str(_id.inserted_id)
+        success = True
 
-    _id = mongo_db.delivery_post.insert_one(data)
-    post_id = str(_id.inserted_id)
+    return jsonify(post_id=post_id, success=success)
 
-    return jsonify(post_id=post_id, success=True)
+#205
+@bp.route('/post/detail/<string:post_id>')
+def inquire_delivery_post_detail(post_id):
+    if not g.user_id:
+        return ('access denied', 500)
+
+    client = mongodb_connection()
+    db = client['delivery']
+
+    find = {
+        '_id': ObjectId(post_id)
+    }
+    update = {
+        '$inc': { 'views': 1 }
+    }
+
+    try:
+        post = db.delivery_post.find_one_and_update(find, update, return_document=ReturnDocument.AFTER)
+    except Exception as e:
+        print(e)
+        success = False
+    else:
+        success = True
+
+    post['_id'] = str(post['_id'])
+    post['store']['_id'] = str(post['store']['_id'])
+
+    return make_response(json.dumps(post, ensure_ascii=False))
+
 
 #206
 @bp.route('/post/update', methods=['GET', 'PATCH'])
-def delivery_post_update():
+def update_delivery_post():
     if not g.user_id:
         return ('access denied', 500)
 
@@ -176,13 +209,10 @@ def delivery_post_update():
             'max_member': True
         }
         post = db.delivery_post.find_one(find, projection)
-        post['success'] = True
 
         return make_response(json.dumps(post, ensure_ascii=False))
 
-
     update_data = request.get_json()
-    print(update_data)
     post_id = update_data['post_id']
     find = {
         '_id': ObjectId(post_id)
@@ -197,8 +227,41 @@ def delivery_post_update():
             'max_member': update_data['max_member']
         }
     }
-    db.delivery_post.update_one(find, update)
-    return jsonify(post_id=post_id)
+    try:
+        db.delivery_post.update_one(find, update)
+    except Exception as e:
+        print(e)
+        success = False
+    else:
+        success = True
+    return jsonify(post_id=post_id, success=success)
+
+#207
+@bp.route('/post/isClosed/condition-switch', methods=['PATCH'])
+def delivery_post_condition_switch():
+    json = request.get_json()
+    post_id = json['post_id']
+
+    client = mongodb_connection()
+    db = client['delivery']
+
+    find = {
+        '_id': ObjectId(post_id)
+    }
+    post = db.delivery_post.find_one(find)
+
+    update = {
+        '$set': { 'is_closed' : not post['is_closed'] }
+    }
+    try:
+        db.delivery_post.update_one(find, update)
+    except Exception as e:
+        print(e)
+        success = False
+    else:
+        success = True
+
+    return jsonify(post_id=post_id, success=success, condition= not post['is_closed'])
 
 #211
 @bp.route('/post/join/condition-switch')
@@ -223,14 +286,12 @@ def delivery_post_join():
                 'join_users': g.user_id,
                 'user_orders': {'user_id': g.user_id}
             }
-
         }
     else:
         update = {
             '$push': {
                 'join_users': g.user_id
             }
-
         }
     db.delivery_post.update_one(find, update)
     return ('', 204)
@@ -253,49 +314,8 @@ def delivery_post_list():
         post['store']['_id'] = str(post['store']['_id'])
     return make_response(json.dumps(post_list, ensure_ascii=False))
 
-#205
-@bp.route('/post/detail/<string:post_id>')
-def delivery_post_detail(post_id):
-    if not g.user_id:
-        return ('access denied', 500)
 
-    client = mongodb_connection()
-    db = client['delivery']
 
-    find = {
-        '_id': ObjectId(post_id)
-    }
-    update = {
-        '$inc': { 'views': 1 }
-    }
-
-    post = db.delivery_post.find_one_and_update(find, update, return_document=ReturnDocument.AFTER)
-
-    post['_id'] = str(post['_id'])
-    post['store']['_id'] = str(post['store']['_id'])
-
-    return make_response(json.dumps(post, ensure_ascii=False))
-
-#207
-@bp.route('/post/condition-switch', methods=['PATCH'])
-def delivery_post_condition_switch():
-    json = request.get_json()
-    post_id = json['post_id']
-
-    client = mongodb_connection()
-    db = client['delivery']
-
-    find = {
-        '_id': ObjectId(post_id)
-    }
-    post = db.delivery_post.find_one(find)
-
-    update = {
-        '$set': { 'is_closed' : not post['is_closed'] }
-    }
-    db.delivery_post.update_one(find, update)
-
-    return jsonify(post_id=post_id, success=True, condition= not post['is_closed'])
 
 #주문하기 관련
 

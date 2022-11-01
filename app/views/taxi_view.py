@@ -121,7 +121,7 @@ def taxi_post_join():
         joined = False
         update = {
             '$pull': {
-                'join_user': g.user_id,
+                'join_users': g.user_id,
             }
 
         }
@@ -129,7 +129,7 @@ def taxi_post_join():
         joined=True
         update = {
             '$push': {
-                'join_user': g.user_id
+                'join_users': g.user_id
             }
 
         }
