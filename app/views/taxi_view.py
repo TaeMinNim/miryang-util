@@ -82,26 +82,6 @@ def taxi_post_detail(post_id):
 
     return make_response(json.dumps(post, ensure_ascii=False))
 
-@bp.route('/post/condition-switch', methods=['PATCH'])
-def taxi_post_condition_switch():
-    json = request.get_json()
-    post_id = json['post_id']
-
-    client = mongodb_connection()
-    db = client['taxi']
-
-    find = {
-        '_id': ObjectId(post_id)
-    }
-    post = db.taxi_post.find_one(find)
-
-    update = {
-        '$set': { 'is_closed' : not post['is_closed'] }
-    }
-    db.taxi_post.update_one(find, update)
-
-    return jsonify(post_id=post_id, success=True, condition= not post['is_closed'])
-
 @bp.route('/post/update', methods=['GET', 'PATCH'])
 def update_taxi_post():
     if not g.user_id:
