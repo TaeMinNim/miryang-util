@@ -264,7 +264,7 @@ def delivery_post_condition_switch():
     return jsonify(post_id=post_id, success=success, condition= not post['is_closed'])
 
 #211
-@bp.route('/post/join/condition-switch')
+@bp.route('/post/join/condition-switch', methods=['PATCH'])
 def delivery_post_join():
     if not g.user_id:
         return ('access denied', 500)
@@ -313,8 +313,6 @@ def delivery_post_list():
         post['_id'] = str(post['_id'])
         post['store']['_id'] = str(post['store']['_id'])
     return make_response(json.dumps(post_list, ensure_ascii=False))
-
-
 
 
 #주문하기 관련
@@ -394,6 +392,8 @@ def delivery_ordering_update():
     db.delivery_post.update_one(find, update)
 
     return jsonify(post_id=post_id, success=True)
+
+
 def pricing(order, db):
     store_id = order['store_id']
     orders = order['orders']

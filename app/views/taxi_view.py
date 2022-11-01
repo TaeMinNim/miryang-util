@@ -26,8 +26,9 @@ def taxi_platform_list():
     print(json_list)
     return make_response(json.dumps(json_list, ensure_ascii=False))
 
+#302
 @bp.route('/post/posting', methods=['POST'])
-def delivery_posting():
+def taxi_posting():
     if not g.user_id:
         return ('access denied', 500)
 
@@ -101,6 +102,59 @@ def taxi_post_condition_switch():
 
     return jsonify(post_id=post_id, success=True, condition= not post['is_closed'])
 
+@bp.route('/post/update', methods=['GET', 'PATCH'])
+def update_taxi_post():
+    if not g.user_id:
+        return ('access denied', 500)
+
+    client = mongodb_connection()
+    db = client['taxi']
+    if request.method == 'GET':
+        post_id = request.args['post_id']
+
+        find = {
+            '_id': ObjectId(post_id)
+        }
+        projection = {
+            '_id': False,
+            'title': True,
+            'content': True,
+            'depart_time': True,
+            'depart_name': True,
+            'dest_name': True,
+            'min_member': True,
+            'max_member': True
+        }
+        post = db.taxi_post.find_one(find, projection)
+
+        return make_response(json.dumps(post, ensure_ascii=False))
+
+    update_data = request.get_json()
+    post_id = update_data['post_id']
+    find = {
+        '_id': ObjectId(post_id)
+    }
+    update={
+        '$set': {
+            'title': update_data['title'],
+            'content': update_data['content'],
+            'depart_time': update_data['depart_time'],
+            'depart_name': update_data['depart_name'],
+            'dest_name': update_data['dest_name'],
+            'min_member': update_data['min_member'],
+            'max_member': update_data['max_member'],
+        }
+    }
+    try:
+        db.taxi_post.update_one(find, update)
+    except Exception as e:
+        print(e)
+        success = False
+    else:
+        success = True
+    return jsonify(post_id=post_id, success=success)
+
+
 @bp.route('/post/join/condition-switch', methods=['PATCH'])
 def taxi_post_join():
     if not g.user_id:
@@ -136,6 +190,33 @@ def taxi_post_join():
     db.taxi_post.update_one(find, update)
 
     return jsonify(post_id=post_id, success=True, join=joined)
+
+@bp.route('/post/isClosed/condition-switch', methods=['PATCH'])
+def taxi_post_condition_switch():
+    json = request.get_json()
+    post_id = json['post_id']
+
+    client = mongodb_connection()
+    db = client['taxi']
+
+    find = {
+        '_id': ObjectId(post_id)
+    }
+    post = db.taxi_post.find_one(find)
+
+    update = {
+        '$set': { 'is_closed' : not post['is_closed'] }
+    }
+    try:
+        db.taxi_post.update_one(find, update)
+    except Exception as e:
+        print(e)
+        success = False
+    else:
+        success = True
+
+    return jsonify(post_id=post_id, success=success, condition= not post['is_closed'])
+
 
 @bp.route('/post/list')
 def taxi_post_list():
