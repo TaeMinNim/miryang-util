@@ -2,10 +2,10 @@ from flask import Blueprint, request, jsonify
 from app.forms import Add_Store_Form, Add_Menu_Form
 from app import mongodb_connection
 import wtforms_json
+from uuid import uuid4
 from datetime import datetime
 
 from bson.objectid import ObjectId
-from pymongo import MongoClient
 
 bp = Blueprint('admin',__name__, url_prefix='/admin')
 wtforms_json.init()
@@ -62,7 +62,7 @@ def add_delivery_group():
     group_list = []
     group_ids = []
     for group in insert_json_data['groups']:
-        id = int(round(datetime.today().timestamp() * 1000))
+        id = str(uuid4())
         group_ids.append(id)
 
         group['group_id'] = id
@@ -92,7 +92,7 @@ def add_delivery_option():
     option_list = []
     option_ids = []
     for option in insert_json_data['options']:
-        id = int(round(datetime.today().timestamp() * 1000))
+        id = str(uuid4())
         option_ids.append(id)
 
         option['option_id'] = id
