@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.forms import Add_Store_Form, Add_Menu_Form, Add_Group_Form, Add_Option_Form
+from app.forms import Add_Store_Form, Add_Menu_Form
 from app import mongodb_connection
 import wtforms_json
 from datetime import datetime
@@ -12,7 +12,7 @@ wtforms_json.init()
 
 @bp.route('/delivery/add/store', methods=['POST'])
 def add_delivery_store():
-    client = MongoClient(host='localhost', port=27017)
+    client = mongodb_connection()
     db = client['delivery']
 
     json = request.get_json()
@@ -30,7 +30,7 @@ def add_delivery_store():
 
 @bp.route('/delivery/add/menu', methods=['POST'])
 def add_delivery_menu():
-    client = MongoClient(host='localhost', port=27017)
+    client = mongodb_connection()
     db = client['delivery']
 
     json = request.get_json()
@@ -53,7 +53,7 @@ def add_delivery_menu():
 
 @bp.route('/delivery/add/group', methods=['POST'])
 def add_delivery_group():
-    client = MongoClient(host='localhost', port=27017)
+    client = mongodb_connection()
     db = client['delivery']
 
     insert_json_data = request.get_json()
@@ -80,7 +80,7 @@ def add_delivery_group():
 
 @bp.route('/delivery/add/option', methods=['POST'])
 def add_delivery_option():
-    client = MongoClient(host='localhost', port=27017)
+    client = mongodb_connection()
     db = client['delivery']
     insert_json_data = request.get_json()
 

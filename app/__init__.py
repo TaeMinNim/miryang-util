@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from config.development import mongodb_user,mongodb_pwd, mysql_user, mysql_pwd
 import pymysql
 def db_connection():
-    db = pymysql.connect(host='http://52.78.106.235:', port=3306, user=mysql_user, passwd=mysql_pwd,db='UTILITY_SERVICE', charset='utf8')
+    db = pymysql.connect(host='localhost', port=3306, user=mysql_user, passwd=mysql_pwd,db='UTILITY_SERVICE', charset='utf8')
     return db
 def mongodb_connection():
     client = MongoClient(f'mongodb://{mongodb_user}:{mongodb_pwd}@localhost:27017')

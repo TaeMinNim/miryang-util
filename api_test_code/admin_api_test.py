@@ -1,6 +1,6 @@
 import requests
 
-aws_add_store = 'http://52.78.106.235:5000/admin/add-store'
+aws_add_store = 'http://52.78.106.235:5000/admin/delivery/add/store'
 local_add_store = 'http://localhost:5000/admin/add-store'
 
 aws_add_menu = 'http://52.78.106.235:5000/admin/add-menu'
@@ -48,10 +48,10 @@ option={
 platform = { 'platform_name' : '기숙사' }
 
 
-#requests.post(aws_add_store, json=store)
+requests.post(aws_add_store, json=store)
 #requests.post(aws_add_menu,json=menu)
 #requests.post(aws_add_group,json=group)
 #requests.post(aws_add_option,json=option)
 
-requests.post('http://localhost:5000/admin/taxi/platform',json=platform)
+#requests.post('http://localhost:5000/admin/taxi/platform',json=platform)
 
