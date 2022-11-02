@@ -30,14 +30,14 @@ menu={
 menu={
     'store_id': '63629389fe982026b114a2eb',
     'section_name': '세트메뉴',
-    'menu_name': '불싸이버거세트',
+    'menu_name': '싸이버거세트',
     'menu_price': 4000
 }
 
 group={
     'store_id': '63629389fe982026b114a2eb',
-    'section_name': '단품메뉴',
-    'menu_name': '싸이버거단품',
+    'section_name': '세트메뉴',
+    'menu_name': '불싸이버거세트',
     'groups': [
         {
             'group_name': '피클',
@@ -55,7 +55,7 @@ group={
 option={
     'store_id': '63629389fe982026b114a2eb',
     'section_name': '단품메뉴',
-    'menu_name': '싸이버거단품',
+    'menu_name': '싸이버거세트',
     'group_id': 'f4f68795-a815-4bd1-a4a4-c9e13a3ca89b',
     'options':[
         {
@@ -71,8 +71,8 @@ option={
 
 option={
     'store_id': '63629389fe982026b114a2eb',
-    'section_name': '단품메뉴',
-    'menu_name': '싸이버거단품',
+    'section_name': '세트메뉴',
+    'menu_name': '싸이버거세트',
     'group_id': '4b600135-0ab9-491e-ac06-d6927a0bce10',
     'options':[
         {
@@ -99,8 +99,8 @@ platform = { 'platform_name' : '기숙사' }
 
 
 #res = requests.post(aws_add_store, json=store)
-res = requests.post(aws_add_menu,json=menu)
-#res = requests.post(aws_add_group,json=group)
+#res = requests.post(aws_add_menu,json=menu)
+res = requests.post(aws_add_group,json=group)
 #res = requests.post(aws_add_option,json=option)
 
 #requests.post('http://localhost:5000/admin/taxi/platform',json=platform)

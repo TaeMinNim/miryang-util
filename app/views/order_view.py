@@ -386,8 +386,7 @@ def delivery_ordering_update():
             }
         }
         user_order = db.delivery_post.find_one(find, projection)
-        print(user_order)
-        user_order = user_order['user_orders'][0]
+        user_order = user_order['orders'][0]
         return make_response(json.dumps(user_order, ensure_ascii=False))
 
     update_json = request.get_json()
@@ -395,7 +394,7 @@ def delivery_ordering_update():
     store_id = update_json['store_id']
     orders = update_json['orders']
 
-    orders = price(orders , db, store_id)
+    orders = price(orders, db, store_id)
 
     find = {
         '_id': ObjectId(post_id),
