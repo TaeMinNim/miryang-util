@@ -443,6 +443,7 @@ def price(orders, db, store_id):
         if len(menu['groups']) > 0:
             for order_group in order_menu['groups']:
                 group = find_group_in_menu(menu, order_group['group_id'])
+                order_group['group_name'] = group['group_name']
                 for order_option in order_group['options']:
                     option = find_option_in_group(group, order_option)
 
