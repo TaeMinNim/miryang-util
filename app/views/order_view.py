@@ -412,7 +412,7 @@ def delivery_ordering_update():
 
 def price(orders, db, store_id):
     find = {"_id": ObjectId(store_id)}
-    menu_list = db.delivery_store_find_one(find)['menus']
+    menu_list = db.delivery_store.find_one(find)['menus']
 
     def find_option_in_group(group, option_id):
         for option in group['options']:
