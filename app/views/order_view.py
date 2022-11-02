@@ -339,8 +339,9 @@ def delivery_ordering():
 
     order_json = request.get_json()
     post_id = order_json['post_id']
+    orders = order_json['orders']
 
-    orders = pricing(order_json, db)
+    orders = price(orders, db)
 
     user_order = {
         'user_id': g.user_id,
@@ -384,8 +385,10 @@ def delivery_ordering_update():
 
     update_json = request.get_json()
     post_id = update_json['post_id']
+    store_id = update_json['store_id']
+    orders = update_json['orders']
 
-    orders = pricing(update_json, db)
+    orders = price(orders , db, store_id)
 
     find = {
         '_id': ObjectId(post_id),
@@ -405,19 +408,16 @@ def delivery_ordering_update():
     return jsonify(post_id=post_id, success=True)
 
 
-def pricing(order, db):
-    store_id = order['store_id']
-    orders = order['orders']
-
-    menus = []
-    groups = []
-    options = []
+def price(orders, db, store_id):
+    menu_name_list = []
+    group_id_list = []
+    option_id_list = []
 
     for order in orders:
-        menus.append(order['menu_name'])
+        menu_name_list.append(order['menu_name'])
         for group in order['groups']:
-            groups.append(group['group_id'])
-            options = options + group['options']
+            group_id_list.append(group['group_id'])
+            option_id_list = option_id_list + group['options']
 
     pipe1 = {
         '$match': {
@@ -439,9 +439,9 @@ def pricing(order, db):
 
     pipe5 = {
         '$match': {
-            'menus.menu_name': {'$in': menus},
-            'menus.groups.group_id': {'$in': groups},
-            'menus.groups.options.option_id': {'$in': options}
+            'menus.menu_name': {'$in': menu_name_list},
+            'menus.groups.group_id': {'$in': group_id_list},
+            'menus.groups.options.option_id': {'$in': option_id_list}
         }
     }
     pipe6 = {
@@ -484,37 +484,32 @@ def pricing(order, db):
 
     menu_list = list(db.delivery_store.aggregate([pipe1, pipe2, pipe3, pipe4, pipe5, pipe6, pipe7]))
 
-    def find_option_price(menu_index, group_index, option_id):
-        for option in menu_list[menu_index]['groups'][group_index]['options']:
+    def find_option_in_group(group, option_id):
+        for option in group['options']:
             if option['option_id'] == option_id:
-                return option['option_name'], option['option_price']
+                return option
 
-    def find_group_index(menu_index, group_id):
-        for group_index, group in enumerate(menu_list[menu_index]['groups']):
+    def find_group_in_menu(menu, group_id):
+        for group in menu['groups']:
             if group_id == group['group_id']:
-                return group_index, group['group_name']
+                return group
 
-    def find_menu_price(menu_name):
-        for menu_index, menu in enumerate(menu_list):
+    def find_menu(menu_name):
+        for menu in menu_list:
             if menu['menu_name'] == menu_name:
-                return menu_index, menu['menu_price']
+                return menu
 
     sum_price = 0
-    for order in orders:
-        menu_index, order['menu_price'] = find_menu_price(order['menu_name'])
-        sum_price += order['menu_price']
-
-        for group in order['groups']:
-            group_index, group['group_name'] = find_group_index(menu_index, group['group_id'])
-            for index, option in enumerate(group['options']):
-                option_name, option_price = find_option_price(menu_index, group_index, option)
-                option_set = {
-                    'option_id': option,
-                    'option_name': option_name,
-                    'option_price': option_price
-                }
-                sum_price += option_price
-                del group['options'][index]
-                group['options'].insert(index, option_set)
-        order['sum_price'] = sum_price
+    for order_menu in orders:
+        menu = find_menu(order_menu['menu_name'])
+        order_menu['menu_price'] = menu['menu_price']
+        sum_price += order_menu['menu_price']
+        if len(menu['groups']) > 0:
+            for order_group in order_menu['groups']:
+                group = find_group_in_menu(menu, order_group['group_id'])
+                for order_option in order_group['options']:
+                    option = find_option_in_group(group, order_option['option_id'])
+                    order_option['option_price'] = option['option_price']
+                    sum_price += order_option['option_price']
+    orders['sum_price'] = sum_price
     return orders
