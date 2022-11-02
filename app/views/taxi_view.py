@@ -152,7 +152,7 @@ def taxi_post_join():
         success = False
         return ('대표자는 그룹을 탈퇴할 수 없습니다', 500)
 
-    if g.user_id in post['join_user']:
+    if g.user_id in post['join_users']:
         join = False
         success = True
         update = {
