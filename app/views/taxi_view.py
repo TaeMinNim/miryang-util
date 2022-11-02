@@ -204,7 +204,7 @@ def taxi_post_condition_switch():
     else:
         success = True
 
-    return jsonify(post_id=post_id, success=success, condition= not post['is_closed'])
+    return jsonify(post_id=post_id, success=success, is_closed = not post['is_closed'])
 
 
 @bp.route('/post/list')
