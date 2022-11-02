@@ -339,9 +339,10 @@ def delivery_ordering():
 
     order_json = request.get_json()
     post_id = order_json['post_id']
+    store_id = order_json['store_id']
     orders = order_json['orders']
 
-    orders = price(orders, db)
+    orders = price(orders, db, store_id)
 
     user_order = {
         'user_id': g.user_id,
