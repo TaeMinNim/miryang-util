@@ -6,7 +6,6 @@ class Signup_Form(Form):
     user_name = StringField("user_name", [DataRequired()])
     pw = StringField("pw", [DataRequired()])
     nick_name = StringField("nick_name", [DataRequired()])
-    student_num = IntegerField("student_num", [DataRequired()])
 
 class Login_Form(Form):
     user_name = StringField("user_name", [DataRequired()])
@@ -45,6 +44,7 @@ class Add_Group_Form(Form):
     group_name = StringField('group_name', [DataRequired()])
     min_orderable_quantity = IntegerField('min_orderable_quantity', [DataRequired()])
     max_orderable_quantity = IntegerField('max_orderable_quantity', [DataRequired()])
+
 class Add_Option_Form(Form):
     store_id = StringField('store_id', [DataRequired()])
     section_name = StringField('section_name', [DataRequired()])

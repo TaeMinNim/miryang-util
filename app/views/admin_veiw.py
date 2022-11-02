@@ -66,6 +66,7 @@ def add_delivery_group():
         group_ids.append(id)
 
         group['group_id'] = id
+        group['options'] = []
         group_list.append(group)
 
     find = {'_id': ObjectId(store_id)}

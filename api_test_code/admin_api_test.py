@@ -21,14 +21,14 @@ store={
 }
 
 menu={
-    'store_id': '636151232f6ecd0a57ecfa1f',
+    'store_id': '63615ce0dcc1006fb5564ce4',
     'section_name': '단품메뉴',
     'menu_name': '싸이버거단품',
     'menu_price': 50000
 }
 
 group={
-    'store_id': '636151232f6ecd0a57ecfa1f',
+    'store_id': '63615ce0dcc1006fb5564ce4',
     'section_name': '단품메뉴',
     'menu_name': '싸이버거단품',
     'groups': [
@@ -41,10 +41,10 @@ group={
 }
 
 option={
-    'store_id': '636151232f6ecd0a57ecfa1f',
+    'store_id': '63615ce0dcc1006fb5564ce4',
     'section_name': '단품메뉴',
     'menu_name': '싸이버거단품',
-    'group_id': '0bc6296b-c8b5-4ed1-92df-016f2c7e276c',
+    'group_id': 'aed7fa09-6e75-4d2a-b6e1-9fe7514e6d96',
     'options':[
         {
             'option_name': '빼기',

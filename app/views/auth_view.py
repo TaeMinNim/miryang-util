@@ -72,7 +72,7 @@ def signup():
         hashed_pw = bcrypt.hashpw(form.pw.data.encode('utf-8'), bcrypt.gensalt())
         hashed_pw = hashed_pw.decode('utf-8')
         sql = """INSERT INTO SERVICE_USER 
-        (id, user_name, pw, student_num, nick_name) VALUE({id}, '{user_name}', '{pw}', {student_num}, '{nick_name}')
+        (id, user_name, pw, nick_name) VALUE({id}, '{user_name}', '{pw}', '{nick_name}')
         """.format(id=id, user_name=form.user_name.data, pw=hashed_pw, student_num=form.student_num.data, nick_name=form.nick_name.data)
 
         try:
