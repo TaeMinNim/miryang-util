@@ -149,6 +149,7 @@ def post_delivery_posting():
     except Exception as e:
         print(e)
         success = False
+        return ('', 500)
     else:
         post_id = str(_id.inserted_id)
         success = True
@@ -176,6 +177,7 @@ def inquire_delivery_post_detail(post_id):
     except Exception as e:
         print(e)
         success = False
+        return ('', 500)
     else:
         success = True
 
@@ -232,6 +234,7 @@ def update_delivery_post():
     except Exception as e:
         print(e)
         success = False
+        return ('',500)
     else:
         success = True
     return jsonify(post_id=post_id, success=success)
@@ -258,6 +261,7 @@ def delivery_post_condition_switch():
     except Exception as e:
         print(e)
         success = False
+        return ('', 500)
     else:
         success = True
 
@@ -303,6 +307,7 @@ def delivery_post_join():
     except Exception as e:
         print(e)
         success = False
+        return ('', 500)
     else:
         success = True
     return jsonify(post_id=post_id, success=success, join=join)

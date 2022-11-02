@@ -80,9 +80,11 @@ def signup():
         except pymysql.err.IntegrityError as e:
             print(e)
             success = False
+            return ('', 500)
         except Exception as e:
             print(e)
             success = False
+            return ('', 500)
         else:
             db.commit()
             success = True
@@ -132,6 +134,7 @@ def analyze_token():
         g.user_id = None
     except Exception as e:
         print(e)
+        return ('', 500)
     else:
         try:
             decoded_token = jwt.decode(token, SECRET_KEY, algorithms='HS256')

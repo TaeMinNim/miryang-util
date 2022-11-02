@@ -130,6 +130,7 @@ def update_taxi_post():
     except Exception as e:
         print(e)
         success = False
+        return ('', 500)
     else:
         success = True
     return jsonify(post_id=post_id, success=success)
@@ -175,6 +176,7 @@ def taxi_post_join():
     except Exception as e:
         success = False
         print(e)
+        return ('', 500)
     else:
         success = True
 
@@ -201,6 +203,7 @@ def taxi_post_condition_switch():
     except Exception as e:
         print(e)
         success = False
+        return ('', 500)
     else:
         success = True
 
