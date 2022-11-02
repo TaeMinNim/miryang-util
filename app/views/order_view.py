@@ -261,7 +261,7 @@ def delivery_post_condition_switch():
     else:
         success = True
 
-    return jsonify(post_id=post_id, success=success, condition= not post['is_closed'])
+    return jsonify(post_id=post_id, success=success, is_closed= not post['is_closed'])
 
 #211
 @bp.route('/post/join/condition-switch', methods=['PATCH'])
@@ -278,9 +278,12 @@ def delivery_post_join():
     post = db.delivery_post.find_one(find)
 
     if g.user_id == post['user_id']:
+        success = False
         return ('대표자는 그룹을 탈퇴할 수 없습니다', 500)
 
     if g.user_id in post['join_user']:
+        join = False
+        success = True
         update = {
             '$pull': {
                 'join_users': g.user_id,
@@ -288,13 +291,21 @@ def delivery_post_join():
             }
         }
     else:
+        join = True
+        success = True
         update = {
             '$push': {
                 'join_users': g.user_id
             }
         }
-    db.delivery_post.update_one(find, update)
-    return ('', 204)
+    try:
+        db.delivery_post.update_one(find, update)
+    except Exception as e:
+        print(e)
+        success = False
+    else:
+        success = True
+    return jsonify(post_id=post_id, success=success, join=join)
 
 #213
 @bp.route('/post/list')

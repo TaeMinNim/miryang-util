@@ -149,10 +149,12 @@ def taxi_post_join():
     post = db.taxi_post.find_one(find)
 
     if g.user_id == post['user_id']:
+        success = False
         return ('대표자는 그룹을 탈퇴할 수 없습니다', 500)
 
     if g.user_id in post['join_user']:
-        joined = False
+        join = False
+        success = True
         update = {
             '$pull': {
                 'join_users': g.user_id,
@@ -160,16 +162,23 @@ def taxi_post_join():
 
         }
     else:
-        joined=True
+        join = True
+        success = True
         update = {
             '$push': {
                 'join_users': g.user_id
             }
 
         }
-    db.taxi_post.update_one(find, update)
+    try:
+        db.taxi_post.update_one(find, update)
+    except Exception as e:
+        success = False
+        print(e)
+    else:
+        success = True
 
-    return jsonify(post_id=post_id, success=True, join=joined)
+    return jsonify(post_id=post_id, success=success, join=join)
 
 @bp.route('/post/isClosed/condition-switch', methods=['PATCH'])
 def taxi_post_condition_switch():
