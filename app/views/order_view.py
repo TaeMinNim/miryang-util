@@ -504,6 +504,7 @@ def price(orders, db, store_id):
     sum_price = 0
     for order_menu in orders:
         menu = find_menu(order_menu['menu_name'])
+
         order_menu['menu_price'] = menu['menu_price']
         sum_price += order_menu['menu_price']
         if len(menu['groups']) > 0:
@@ -516,5 +517,5 @@ def price(orders, db, store_id):
                     order_group['options'].append(option)
 
                     sum_price += option['option_price']
-    orders['sum_price'] = sum_price
+        order_menu['sum_price'] = sum_price
     return orders
