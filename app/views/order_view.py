@@ -270,8 +270,8 @@ def delivery_post_join():
         return ('access denied', 500)
     client = mongodb_connection()
     db = client['delivery']
-
-    post_id = request.args['post_id']
+    json = request.get_json()
+    post_id = json['post_id']
     find = {
         '_id': ObjectId(post_id)
     }
