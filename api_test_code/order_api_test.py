@@ -111,7 +111,7 @@ update_order ={
 #res = requests.post('http://52.78.106.235:5000/order/post/posting', headers=loginheader, json=posting)
 
 #205
-res = requests.get('http://52.78.106.235:5000/order/post/detail/63629f046b5a97435a17bc60', headers=loginheader)
+#res = requests.get('http://52.78.106.235:5000/order/post/detail/63629f046b5a97435a17bc60', headers=loginheader)
 
 #206
 #GET
@@ -127,7 +127,7 @@ res = requests.get('http://52.78.106.235:5000/order/post/detail/63629f046b5a9743
 
 #210
 #GET
-#res = requests.get('http://52.78.106.235:5000/order/ordering/update?post_id=63576f0561c32ac32836f9b7', headers=loginheader)
+res = requests.get('http://52.78.106.235:5000/order/ordering/update?post_id=6362c493d1212895e1f369ad', headers=loginheader)
 #PATCH
 #res = requests.patch('http://localhost:5000/order/ordering/update', headers=loginheader, json=update_order)
 
