@@ -483,9 +483,14 @@ def price(orders, db, store_id):
             }
         }
     }
+    find  = {"_id": ObjectId(store_id)}
 
     menu_list = list(db.delivery_store.aggregate([pipe1, pipe2, pipe3, pipe4, pipe5, pipe6, pipe7]))
-    menu_list = db.delivery_store_find_one({"_id": ObjectId(store_id)})['menus']
+    menu_list = db.delivery_store_find_one(find)
+    print(type(menu_list))
+    print(menu_list)
+    menu_list = db.delivery_store_find_one(find)['menus']
+
     def find_option_in_group(group, option_id):
         for option in group['options']:
             if option['option_id'] == option_id:
