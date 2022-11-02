@@ -382,8 +382,8 @@ def delivery_ordering_update():
         }
         user_order = db.delivery_post.find_one(find, projection)
         print(user_order)
-        orders = user_order['user_orders'][0]
-        return make_response(json.dumps(orders, ensure_ascii=False))
+        user_order = user_order['user_orders'][0]
+        return make_response(json.dumps(user_order, ensure_ascii=False))
 
     update_json = request.get_json()
     post_id = update_json['post_id']
@@ -510,7 +510,7 @@ def price(orders, db, store_id):
             for order_group in order_menu['groups']:
                 group = find_group_in_menu(menu, order_group['group_id'])
                 for order_option in order_group['options']:
-                    option = find_option_in_group(group, order_option['option_id'])
+                    option = find_option_in_group(group, order_option)
                     order_option['option_price'] = option['option_price']
                     sum_price += order_option['option_price']
     orders['sum_price'] = sum_price
