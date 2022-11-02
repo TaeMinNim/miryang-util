@@ -394,7 +394,7 @@ def delivery_ordering_update():
     post_id = update_json['post_id']
     store_id = update_json['store_id']
     orders = update_json['orders']
-
+    print(orders)
     orders = price(orders, db, store_id)
 
     find = {
