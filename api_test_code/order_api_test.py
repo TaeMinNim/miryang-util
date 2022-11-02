@@ -111,7 +111,7 @@ update_order ={
 #res = requests.post('http://52.78.106.235:5000/order/post/posting', headers=loginheader, json=posting)
 
 #205
-res = requests.get('http://52.78.106.235:5000/order/post/detail/63615db0dcc11006fb5564cf2', headers=loginheader)
+res = requests.get('http://52.78.106.235:5000/order/post/detail/63629f046b5a97435a17bc60', headers=loginheader)
 
 #206
 #GET
