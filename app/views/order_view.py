@@ -380,8 +380,9 @@ def delivery_ordering_update():
                 '$elemMatch': {'user_id': g.user_id}
             }
         }
-        data = db.delivery_post.find_one(find, projection)
-        orders = data['user_orders'][0]
+        user_order = db.delivery_post.find_one(find, projection)
+        print(user_order)
+        orders = user_order['user_orders'][0]
         return make_response(json.dumps(orders, ensure_ascii=False))
 
     update_json = request.get_json()
