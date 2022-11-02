@@ -385,7 +385,6 @@ def delivery_ordering_update():
                 '$elemMatch': {'user_id': g.user_id}
             }
         }
-        print(g.user_id)
         user_order = db.delivery_post.find_one(find, projection)
         user_order = user_order['user_orders'][0]
         return make_response(json.dumps(user_order, ensure_ascii=False))
@@ -394,7 +393,6 @@ def delivery_ordering_update():
     post_id = update_json['post_id']
     store_id = update_json['store_id']
     orders = update_json['orders']
-    print(orders)
     orders = price(orders, db, store_id)
 
     find = {
