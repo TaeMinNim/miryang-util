@@ -511,7 +511,10 @@ def price(orders, db, store_id):
                 group = find_group_in_menu(menu, order_group['group_id'])
                 for order_option in order_group['options']:
                     option = find_option_in_group(group, order_option)
-                    order_option['option_price'] = option['option_price']
-                    sum_price += order_option['option_price']
+
+                    order_group['options'].remove(order_option)
+                    order_group['options'].append(option)
+
+                    sum_price += option['option_price']
     orders['sum_price'] = sum_price
     return orders
